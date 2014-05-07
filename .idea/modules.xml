@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/libs/facebook/facebook.iml" filepath="$PROJECT_DIR$/libs/facebook/facebook.iml" />
+      <module fileurl="file://$PROJECT_DIR$/fiveInRowParse.iml" filepath="$PROJECT_DIR$/fiveInRowParse.iml" />
+      <module fileurl="file://$PROJECT_DIR$/fiveInRowParse/fiveInRowParse-fiveInRowParse.iml" filepath="$PROJECT_DIR$/fiveInRowParse/fiveInRowParse-fiveInRowParse.iml" />
+      <module fileurl="file://$PROJECT_DIR$/libs/libs.iml" filepath="$PROJECT_DIR$/libs/libs.iml" />
+      <module fileurl="file://$PROJECT_DIR$/libs/libs.iml" filepath="$PROJECT_DIR$/libs/libs.iml" />
+    </modules>
+  </component>
+</project>
+

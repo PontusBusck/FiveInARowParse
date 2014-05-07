@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/add_friend_label"
+        android:text="Search for a friend"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="35sp"
+        android:layout_centerHorizontal="true"/>
+
+    <EditText
+        android:id="@+id/search_friend_textfield"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/add_friend_label"
+        android:layout_marginLeft="144dp"
+        android:layout_marginRight="144dp"
+        android:layout_marginTop="48dp"
+        android:hint="Username"/>
+
+    <Button
+        android:id="@+id/add_friend_search_button"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/search_friend_textfield"
+        android:layout_marginTop="12dp"
+        android:layout_marginLeft="144dp"
+        android:layout_marginRight="144dp"
+        android:text="Add friend"
+        android:onClick="addAFriendButtonClicked"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="12dp"
+        android:text="Back"/>
+
+
+
+</RelativeLayout>

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/Login_label"
+        android:text="Login!"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="35sp"
+        android:layout_centerHorizontal="true"/>
+
+    <EditText
+        android:id="@+id/username_login_textfield"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/Login_label"
+        android:layout_marginLeft="144dp"
+        android:layout_marginRight="144dp"
+        android:layout_marginTop="48dp"
+        android:hint="Username"/>
+
+    <EditText
+        android:id="@+id/password_login_textfield"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/username_login_textfield"
+        android:layout_marginLeft="144dp"
+        android:layout_marginRight="144dp"
+        android:hint="Password"
+        android:inputType="textPassword"
+        android:layout_marginTop="12dp"/>
+    <Button
+        android:id="@+id/login_button"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/password_login_textfield"
+        android:layout_marginTop="12dp"
+        android:layout_marginLeft="144dp"
+        android:layout_marginRight="144dp"
+        android:text="Login!"
+        android:onClick="loginUser"/>
+
+    <Button
+        android:id="@+id/register_Insted_button"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/login_button"
+        android:layout_marginTop="12dp"
+        android:layout_marginLeft="144dp"
+        android:layout_marginRight="144dp"
+        android:text="Register insted!"
+        android:onClick="goToRegisterUser"/>
+
+
+
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="12dp"
+        android:text="Back"/>
+
+
+
+</RelativeLayout>
