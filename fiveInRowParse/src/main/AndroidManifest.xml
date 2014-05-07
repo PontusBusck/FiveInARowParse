@@ -79,7 +79,7 @@
             android:exported="false" >
             <intent-filter>
                 <action android:name="com.example.NEW_GAME_INVITE" />
-                <action android:name="com.busck.SYSTEM_BECOMES_ACTIVE" />
+                <action android:name="com.busck.NEW_PLAYER_MOVE" />
                 <action android:name="com.busck.SYSTEM_BECOMES_INACTIVE" />
 
             </intent-filter>

@@ -158,6 +158,17 @@ public class MyOnlineBoard extends View {
         //boardBackground = Bitmap.createScaledBitmap(boardBackground, parentWidth, parentHeight, false);
     }
 
+    public void uppdateGame(int[] gameArray, String playerTurn,  int myPlayerNumer){
+        mGameArray = gameArray;
+        mMyPlayerNumber = myPlayerNumer;
+
+        if(playerTurn.equals(ParseUser.getCurrentUser().getUsername())){
+            PLAYER_TURN = myPlayerNumer;
+        }
+
+        
+        invalidate();
+    }
 
     @Override
     protected void onDraw(Canvas canvas) {

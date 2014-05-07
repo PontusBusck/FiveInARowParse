@@ -1,6 +1,10 @@
 package com.example.fiveinrowparse;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
@@ -105,6 +109,17 @@ public class OnlineGameActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
+        MainApplication.onlineGameIsVisibe();
+        registerReceiver(broadcastReceiver, new IntentFilter("com.busck.UPPDATE_THE_GAME"));
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        MainApplication.onlineGameIsNotVisible();
+        unregisterReceiver(broadcastReceiver);
+
     }
 
     public void saveGameId(String gameId) {
@@ -114,6 +129,45 @@ public class OnlineGameActivity extends Activity {
         editor.putString(MY_CURRENT_GAME, gameId);
         editor.commit();
     }
+
+    public void uppdateTheGame(){
+
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Games");
+        query.getInBackground(mCurrentGameId, new GetCallback<ParseObject>() {
+            public void done(ParseObject game, ParseException e) {
+                if (e == null) {
+                    mGameArray = gameStringToGameArray(game.getString("gameArray"));
+                    mPlayerTurn = game.getString("playersTurn");
+                    playerOneName = game.getString("playerOneName");
+                    playerTwoName = game.getString("playerTwoName");
+                    if(playerOneName.equals(ParseUser.getCurrentUser().getUsername())){
+                        mOpponent = playerTwoName;
+                    }else{
+                        mOpponent = playerOneName;
+                    }
+
+                    int myPlayerNumber;
+                    if(playerOneName.equals(ParseUser.getCurrentUser().getUsername())){
+                        myPlayerNumber = 1;
+                    }else{
+                        myPlayerNumber = 2;
+                    }
+
+                    mGameBoard.uppdateGame(mGameArray, mPlayerTurn, myPlayerNumber);
+
+                } else {
+                    Toast.makeText(OnlineGameActivity.this, "could not contact the server", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
+    BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            uppdateTheGame();
+        }
+    };
 
     public void startUpAcceptedOnlineGame(){
 
@@ -299,7 +353,7 @@ public class OnlineGameActivity extends Activity {
                     game.saveInBackground(new SaveCallback() {
                         public void done(ParseException e) {
                             if (e == null) {
-                                notifyTheOtherUserAboutTheGame(mOpponentUserId);
+                                notifyTheOtherUserAboutTheMove(mOpponentUserId);
 
 
                             } else {
@@ -311,6 +365,28 @@ public class OnlineGameActivity extends Activity {
                 }
             }
         });
+
+    }
+
+    private void notifyTheOtherUserAboutTheMove(String recivingUserId) {
+        ParseQuery userQuery = ParseInstallation.getQuery();
+        userQuery.whereEqualTo("userId", recivingUserId);
+
+        JSONObject data = new JSONObject();
+        try {
+            data.put("action", "com.busck.NEW_PLAYER_MOVE");
+            data.put("fromUser", ParseUser.getCurrentUser().getUsername());
+            data.put("gameId", mCurrentGameId);
+            data.put("fromUserId", ParseUser.getCurrentUser().getObjectId());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        ParsePush parsePush = new ParsePush();
+        parsePush.setQuery(userQuery);
+        parsePush.setMessage("New game invite");
+        parsePush.setData(data);
+        parsePush.sendInBackground();
 
     }
 
