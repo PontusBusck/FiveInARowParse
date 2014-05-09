@@ -58,6 +58,8 @@ public class PlayWithFriendActivity extends Activity {
         startActivity(intent);
     }
 
+
+
     public void playWithFriend(View view) {
         SharedPreferences prefs = this.getSharedPreferences(MY_PREFS_STRING, 0);
         String opponentUserName = prefs.getString(MY_FRIEND_USERNAME_STRING, null);

@@ -166,7 +166,7 @@ public class MyOnlineBoard extends View {
             PLAYER_TURN = myPlayerNumer;
         }
 
-        
+
         invalidate();
     }
 

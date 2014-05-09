@@ -93,19 +93,28 @@ public class CreateGameActivity extends Activity {
     }
 
     public void openOnlineGameOptionScreen(View view) {
-        FragmentManager fragmentManager = getFragmentManager();
+        /*FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.container, mStartOnlineGameFragment).commit();
+        */
 
         ParseUser currentUser = ParseUser.getCurrentUser();
         if (currentUser != null) {
-            // do nothing
+            Intent intent = new Intent(this, GameListActivity.class);
+            startActivity(intent);
         } else {
             Intent intent = new Intent(this, userRegisterOrLoginActivity.class);
             startActivity(intent);
         }
 
+
+
+
+
+
     }
+
+
 
     public void startRandomOnlineGame(View view) {
 

@@ -8,5 +8,6 @@
     <string name="title_activity_user_register_or_login">userRegisterOrLoginActivity</string>
     <string name="title_activity_play_with_friend">PlayWithFriendActivity</string>
     <string name="title_activity_add_friend">addFriendActivity</string>
+    <string name="title_activity_game_list">GameListActivity</string>
 
 </resources>

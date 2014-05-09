@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.fiveinrowparse" >
+
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
@@ -8,20 +9,21 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
-    <permission android:protectionLevel="signature"
-        android:name="com.example.fiveinrowparse.permission.C2D_MESSAGE" />
+
+    <permission
+        android:name="com.example.fiveinrowparse.permission.C2D_MESSAGE"
+        android:protectionLevel="signature" />
+
     <uses-permission android:name="com.example.fiveinrowparse.permission.C2D_MESSAGE" />
 
     <application
-        android:name=".MainApplication"
+        android:name="com.example.fiveinrowparse.MainApplication"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
-
-
         <activity
-            android:name=".LocalGameActivity"
+            android:name="com.example.fiveinrowparse.LocalGameActivity"
             android:label="@string/app_name"
             android:screenOrientation="landscape" >
         </activity>
@@ -55,21 +57,21 @@
         </activity>
 
         <service android:name="com.parse.PushService" />
-        <receiver android:name="com.parse.ParseBroadcastReceiver">
+
+        <receiver android:name="com.parse.ParseBroadcastReceiver" >
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.USER_PRESENT" />
             </intent-filter>
         </receiver>
-        <receiver android:name="com.parse.GcmBroadcastReceiver"
-            android:permission="com.google.android.c2dm.permission.SEND">
+        <receiver
+            android:name="com.parse.GcmBroadcastReceiver"
+            android:permission="com.google.android.c2dm.permission.SEND" >
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
                 <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
 
-                <!--
-                  IMPORTANT: Change "com.parse.tutorials.pushnotifications" to match your app's package name.
-                -->
+<!--                   IMPORTANT: Change "com.parse.tutorials.pushnotifications" to match your app's package name. -->
                 <category android:name="com.example.fiveinrowparse" />
             </intent-filter>
         </receiver>
@@ -81,10 +83,13 @@
                 <action android:name="com.example.NEW_GAME_INVITE" />
                 <action android:name="com.busck.NEW_PLAYER_MOVE" />
                 <action android:name="com.busck.SYSTEM_BECOMES_INACTIVE" />
-
             </intent-filter>
         </receiver>
 
+        <activity
+            android:name="com.example.fiveinrowparse.GameListActivity"
+            android:label="@string/title_activity_game_list" >
+        </activity>
     </application>
 
 </manifest>

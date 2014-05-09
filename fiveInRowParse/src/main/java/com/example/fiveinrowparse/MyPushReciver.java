@@ -53,7 +53,7 @@ public class MyPushReciver extends BroadcastReceiver {
 
 
                    Log.d("recivertest", gameId);
-                   Intent acceptInvite = new Intent(appContext, OnlineGameActivity.class);
+                   Intent acceptInvite = new Intent(appContext, GameListActivity.class);
                    acceptInvite.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_SINGLE_TOP);
                    acceptInvite.putExtra("gameId", gameId);
                    acceptInvite.putExtra("opponent", fromUser);
@@ -79,18 +79,37 @@ public class MyPushReciver extends BroadcastReceiver {
 
 
                } else if (ACTION_NEW_PLAYER_MOVE.equals(action)){
+
+                   String fromUser = "";
+                   String gameId = "";
+                   String fromUserId = "";
+
+                   if(intent.getExtras() != null) {
+                       try {
+                           JSONObject json = new JSONObject(intent.getExtras().getString("com.parse.Data"));
+                           fromUser = json.getString("fromUser");
+                           fromUserId = json.getString("fromUserId");
+                           gameId = json.getString("gameId");
+                           Log.d("com.busck.taxikurrir", "Min json: " + fromUser + " " + gameId);
+
+                       } catch (JSONException e) {
+                           e.printStackTrace();
+                       }
+
+                   }
+
                    if(MainApplication.isIsOnlineGameVisible()){
                        //Skickar iväg en broadcast till min OnlineGameActivity om den är öppen
                        context.sendBroadcast(new Intent("com.busck.UPPDATE_THE_GAME"));
                        Log.d("recivertest", "AlTheWay");
                    } else {
                        //Skickar notification om den är stängd
-                       Intent notificationIntent = new Intent(appContext, OnlineGameActivity.class);
+                       Intent notificationIntent = new Intent(appContext, GameListActivity.class);
                        //notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                        //notificationIntent.putExtra(getString(R.string.FRAGMENT_VALUE), 1);
                        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
-                       PendingIntent pendingNotificationIntent = PendingIntent.getActivity(appContext, 1, notificationIntent, 0);
+                       PendingIntent pendingNotificationIntent = PendingIntent.getActivity(appContext, 1, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
 
                        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(appContext)
@@ -98,7 +117,7 @@ public class MyPushReciver extends BroadcastReceiver {
                                    .setSmallIcon(R.drawable.ic_launcher)
                                    .setContentTitle("New move!")
                                    .setContentIntent(pendingNotificationIntent)
-                                   .setContentText("User x did a move");
+                                   .setContentText("User " + fromUser + " did a move");
 
 
                        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);

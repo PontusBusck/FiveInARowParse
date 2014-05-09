@@ -50,15 +50,17 @@ public class OnlineGameActivity extends Activity {
 
     //Online variables
     String MY_PREFS_STRING = "myPrefs";
-    String MY_CURRENT_GAME = "myCurrentOnlineGame";
+    String MY_CURRENT_GAME_ID = "myCurrentOnlineGame";
     String DO_I_HAVE_A_GAME = "doIhaveAGame";
     private int[] mGameArray = new int[800];
     private String mCurrentGameId;
     private String mOpponent;
     String OPPONENT_USER_NAME = "opponentUsername";
+    String START_NEW_GAME_INTENT_STRING = "StartnewGame";
     String OPPONENT_ID = "opponentId";
     private String mPlayerTurn;
     private String mOpponentUserId;
+    Boolean mStartNewGame = true;
 
 
     @Override
@@ -83,27 +85,36 @@ public class OnlineGameActivity extends Activity {
 
         Boolean challanged = getIntent().getBooleanExtra("challanged", false);
 
-        if(challanged){
+        if (challanged) {
 
             mCurrentGameId = getIntent().getStringExtra("gameId");
             mOpponentUserId = getIntent().getStringExtra("fromUserId");
             startUpAcceptedOnlineGame();
 
-        } else{
-            startUpOnlineGame();
+        } else {
+            mStartNewGame = getIntent().getBooleanExtra(START_NEW_GAME_INTENT_STRING, false);
+            mCurrentGameId = getIntent().getStringExtra(MY_CURRENT_GAME_ID);
+
+            /*
+            mCurrentGameId = getIntent().getStringExtra(MY_CURRENT_GAME_ID);
+
+
+            mOpponent = getIntent().getStringExtra(OPPONENT_USER_NAME);
+
             playerOneName = ParseUser.getCurrentUser().getUsername();
             playerTwoName = getIntent().getStringExtra(OPPONENT_USER_NAME);
             currentPlayerString.setText(playerOneName + "turn!");
             mOpponentUserId = getIntent().getStringExtra(OPPONENT_ID);
+
+            mPlayerOneScore.setText(playerOneName + ": " + Integer.toString(mPlayerOneWins));
+            mPlayerTwoScore.setText(playerTwoName + ": " + Integer.toString(mPlayerTwoWins));
+            */
+            startUpOnlineGame();
+
+            //makeANewOnlineGame();
+
+
         }
-
-        mPlayerOneScore.setText(playerOneName + ": " + Integer.toString(mPlayerOneWins));
-        mPlayerTwoScore.setText(playerTwoName + ": " + Integer.toString(mPlayerTwoWins));
-
-        //makeANewOnlineGame();
-
-
-
     }
 
     @Override
@@ -122,13 +133,7 @@ public class OnlineGameActivity extends Activity {
 
     }
 
-    public void saveGameId(String gameId) {
-        SharedPreferences prefs = getSharedPreferences(MY_PREFS_STRING, 0);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putBoolean(DO_I_HAVE_A_GAME, true);
-        editor.putString(MY_CURRENT_GAME, gameId);
-        editor.commit();
-    }
+
 
     public void uppdateTheGame(){
 
@@ -153,10 +158,14 @@ public class OnlineGameActivity extends Activity {
                         myPlayerNumber = 2;
                     }
 
+                    currentPlayerString.setText(mPlayerTurn + " " + "turn!");
+                    mPlayerOneScore.setText(playerOneName + ": " + Integer.toString(mPlayerOneWins));
+                    mPlayerTwoScore.setText(playerTwoName + ": " + Integer.toString(mPlayerTwoWins));
+
                     mGameBoard.uppdateGame(mGameArray, mPlayerTurn, myPlayerNumber);
 
                 } else {
-                    Toast.makeText(OnlineGameActivity.this, "could not contact the server", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(OnlineGameActivity.this, "could not contact the server uppdatethegame", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -192,7 +201,7 @@ public class OnlineGameActivity extends Activity {
                     }
 
                 } else {
-                    Toast.makeText(OnlineGameActivity.this, "could not contact the server", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(OnlineGameActivity.this, "could not contact the server <startUpAcceptedGame>", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -200,23 +209,31 @@ public class OnlineGameActivity extends Activity {
     }
 
     public void startUpOnlineGame() {
-        final Boolean doIhaveGame;
+
         SharedPreferences prefs = getSharedPreferences(MY_PREFS_STRING, 0);
-        doIhaveGame = prefs.getBoolean(DO_I_HAVE_A_GAME, false);
         ParseUser currentUser = ParseUser.getCurrentUser();
-        if (!doIhaveGame) {
-            mOpponent = playerTwoName;
+        if (mStartNewGame) {
+            //mOpponent = playerTwoName;
             mPlayerTurn = ParseUser.getCurrentUser().getUsername();
             final ParseObject game = new ParseObject("Games");
             game.put("playerOneName", currentUser.getUsername());
+            game.put("playerOneId", currentUser.getObjectId());
             game.put("playerTwoName", getIntent().getStringExtra(OPPONENT_USER_NAME));
+            game.put("playerTwoId", getIntent().getStringExtra(OPPONENT_ID));
             game.put("playersTurn", currentUser.getUsername());
             game.put("gameArray", Arrays.toString(mGameArray));
             game.saveInBackground(new SaveCallback() {
                 public void done(ParseException e) {
                     if (e == null) {
                         mCurrentGameId = game.getObjectId();
-                        saveGameId(mCurrentGameId);
+                        playerTwoName = game.getString("playerTwoName");
+                        playerOneName = game.getString("playerOneName");
+                        mOpponent = getIntent().getStringExtra(OPPONENT_USER_NAME);
+                        mOpponentUserId = getIntent().getStringExtra(OPPONENT_ID);
+
+                        currentPlayerString.setText(game.getString("playersTurn") + " " + "turn!");
+                        mPlayerOneScore.setText(playerOneName + ": " + Integer.toString(mPlayerOneWins));
+                        mPlayerTwoScore.setText(playerTwoName + ": " + Integer.toString(mPlayerTwoWins));
 
                         if (mGameBoard == null) {
                             Log.d("No board", "noBoard");
@@ -234,24 +251,34 @@ public class OnlineGameActivity extends Activity {
             });
 
 
-        } else if (doIhaveGame) {
-            mCurrentGameId = prefs.getString(MY_CURRENT_GAME, null);
+        } else if (!mStartNewGame) {
+
 
             ParseQuery<ParseObject> query = ParseQuery.getQuery("Games");
             query.getInBackground(mCurrentGameId, new GetCallback<ParseObject>() {
                 public void done(ParseObject game, ParseException e) {
                     if (e == null) {
                         mGameArray = gameStringToGameArray(game.getString("gameArray"));
-                        mOpponent = game.getString("playerTwoName");
+
                         Toast.makeText(OnlineGameActivity.this, "old game", Toast.LENGTH_SHORT).show();
                         if (mGameBoard == null) {
                             mPlayerTurn = game.getString("playersTurn");
+
+                            mOpponent = getIntent().getStringExtra(OPPONENT_USER_NAME);
+                            mOpponentUserId = getIntent().getStringExtra(OPPONENT_ID);
+                            playerOneName = game.getString("playerOneName");
+                            playerTwoName = game.getString("playerTwoName");
+
+                            currentPlayerString.setText(game.getString("playersTurn") + " " + "turn!");
+                            mPlayerOneScore.setText(playerOneName + ": " + Integer.toString(mPlayerOneWins));
+                            mPlayerTwoScore.setText(playerTwoName + ": " + Integer.toString(mPlayerTwoWins));
                             createTheBoard(mGameArray);
                             Log.d("No board", "noBoard");
                         }
 
                     } else {
-                        Toast.makeText(OnlineGameActivity.this, "could not contact the server", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(OnlineGameActivity.this, "cou¶ld not contact the server startoldgame", Toast.LENGTH_SHORT).show();
+                        //Log.d("error start old game", e.);
                     }
                 }
             });
