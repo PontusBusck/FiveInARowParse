@@ -30,12 +30,14 @@
         <activity
             android:name="com.example.fiveinrowparse.OnlineGameActivity"
             android:label="@string/app_name"
-            android:screenOrientation="landscape" >
+            android:screenOrientation="landscape"
+           >
         </activity>
         <activity
             android:name="com.example.fiveinrowparse.CreateGameActivity"
             android:label="@string/title_activity_create_game"
-            android:screenOrientation="landscape" >
+            android:screenOrientation="landscape"
+            >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -71,7 +73,7 @@
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
                 <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
 
-<!--                   IMPORTANT: Change "com.parse.tutorials.pushnotifications" to match your app's package name. -->
+                <!-- IMPORTANT: Change "com.parse.tutorials.pushnotifications" to match your app's package name. -->
                 <category android:name="com.example.fiveinrowparse" />
             </intent-filter>
         </receiver>
@@ -89,6 +91,10 @@
         <activity
             android:name="com.example.fiveinrowparse.GameListActivity"
             android:label="@string/title_activity_game_list" >
+        </activity>
+        <activity
+            android:name="com.example.fiveinrowparse.FriendListActivity"
+            android:label="@string/title_activity_friend_list" >
         </activity>
     </application>
 

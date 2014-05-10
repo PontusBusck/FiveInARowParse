@@ -24,7 +24,7 @@
         android:layout_below="@+id/play_with_friend_button"
         android:layout_centerHorizontal="true"
         android:text="Add Friend"
-        android:onClick="openAddFriendsActivity"/>
+        android:onClick="openFriendList"/>
 
     <Button
         android:text="Remove games and friend"

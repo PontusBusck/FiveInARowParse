@@ -2,6 +2,7 @@ package com.example.fiveinrowparse;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,15 +14,22 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.parse.FindCallback;
+import com.parse.LogInCallback;
 import com.parse.Parse;
 import com.parse.ParseException;
+import com.parse.ParseInstallation;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
+import com.parse.SignUpCallback;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -54,7 +62,125 @@ public class GameListActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
+
+        if(ParseUser.getCurrentUser() != null){
         getAllGames();
+
+        }
+
+        handleLoginWindowVisability();
+    }
+
+    public void handleLoginWindowVisability(){
+        ParseUser currentUser = ParseUser.getCurrentUser();
+        if (currentUser != null) {
+            RelativeLayout loginLayout = (RelativeLayout) findViewById(R.id.login_layout);
+            TextView usernameLabel = (TextView) findViewById(R.id.username_label);
+            usernameLabel.setText("Welcome " + ParseUser.getCurrentUser().getUsername());
+            loginLayout.setVisibility(View.INVISIBLE);
+
+            Button logoutButton = (Button) findViewById(R.id.logout_button);
+            logoutButton.setVisibility(View.VISIBLE);
+        } else {
+
+            RelativeLayout loginLayout = (RelativeLayout) findViewById(R.id.login_layout);
+            loginLayout.setVisibility(View.VISIBLE);
+
+            TextView usernameLabel = (TextView) findViewById(R.id.username_label);
+            usernameLabel.setText("You have to login to continue");
+
+            Button logoutButton = (Button) findViewById(R.id.logout_button);
+            logoutButton.setVisibility(View.INVISIBLE);
+
+        }
+    }
+
+
+    public void loginUser(View view) {
+        EditText usernameField = (EditText) findViewById(R.id.username_login_textfield);
+        EditText passwordField = (EditText) findViewById(R.id.password_login_textfield);
+
+        if(usernameField.getText() != null && passwordField.getText() != null) {
+            String username = usernameField.getText().toString();
+            String password = passwordField.getText().toString();
+
+            if(!username.equals("") && !password.equals("")) {
+                ParseUser.logInInBackground(usernameField.getText().toString(), passwordField.getText().toString(), new LogInCallback() {
+                    public void done(ParseUser user, ParseException e) {
+                        if (user != null) {
+                            ParseInstallation installation = ParseInstallation.getCurrentInstallation();
+                            installation.put("userId", ParseUser.getCurrentUser().getObjectId());
+                            installation.saveInBackground();
+                            Toast.makeText(GameListActivity.this, "Logged in!", Toast.LENGTH_SHORT).show();
+                            handleLoginWindowVisability();
+                            getAllGames();
+                        } else {
+                            Toast.makeText(GameListActivity.this, "Something went wrong, please try again!", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+            } else{
+                Toast.makeText(this, "You must enter both a password and a username!", Toast.LENGTH_SHORT).show();
+
+            }
+        } else {
+            Toast.makeText(this, "You must enter both a password and a username!", Toast.LENGTH_SHORT).show();
+
+        }
+    }
+
+    public void registerUser(View view) {
+
+        EditText usernameField = (EditText) findViewById(R.id.username_login_textfield);
+        EditText passwordField = (EditText) findViewById(R.id.password_login_textfield);
+
+        if(usernameField.getText() != null && passwordField.getText() != null) {
+            String username = usernameField.getText().toString();
+            String password = passwordField.getText().toString();
+
+            if(!username.equals("") && !password.equals("")) {
+                ParseUser user = new ParseUser();
+                user.setUsername(usernameField.getText().toString());
+                user.setPassword(usernameField.getText().toString());
+
+                user.signUpInBackground(new SignUpCallback() {
+                    public void done(ParseException e) {
+                        if (e == null) {
+
+                            ParseInstallation installation = ParseInstallation.getCurrentInstallation();
+                            installation.put("userId", ParseUser.getCurrentUser().getObjectId());
+                            installation.saveInBackground();
+
+                            handleLoginWindowVisability();
+                            getAllGames();
+                            Toast.makeText(GameListActivity.this, "User created!", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(GameListActivity.this, "Something went wrong, please try again!", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+
+
+            }else{
+                Toast.makeText(this, "You must choose both a password and a username!", Toast.LENGTH_SHORT).show();
+            }
+
+        } else{
+            Toast.makeText(this, "You must choose both a password and a username!", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+
+    public void logoutUser(View view) {
+        ParseInstallation installation = ParseInstallation.getCurrentInstallation();
+        installation.remove("userId");
+        installation.saveInBackground();
+
+        ParseUser.logOut();
+        mAllGamesList.clear();
+        mGameAdapter.notifyDataSetChanged();
+
+        handleLoginWindowVisability();
     }
 
     private void getAllGames() {
@@ -138,25 +264,17 @@ public class GameListActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void playWithFriend(View view) {
-        SharedPreferences prefs = this.getSharedPreferences(MY_PREFS_STRING, 0);
-        String opponentUserName = prefs.getString(MY_FRIEND_USERNAME_STRING, null);
-        String opponentId = prefs.getString(MY_FRIEND_STRING, null);
+    public void openFriendList(View view) {
 
-
-        Intent intent = new Intent(this, OnlineGameActivity.class);
-        intent.putExtra(OPPONENT_USER_NAME, opponentUserName);
-        intent.putExtra(OPPONENT_ID, opponentId);
-        intent.putExtra(START_NEW_GAME_INTENT_STRING, true);
-
-
+        if(ParseUser.getCurrentUser() != null){
+        Intent intent = new Intent(this, FriendListActivity.class);
         startActivity(intent);
+
+        }
     }
 
-    public void openAddFriendsActivity(View view) {
-        Intent intent = new Intent(this, addFriendActivity.class);
-        startActivity(intent);
-    }
+
+
 
     static class GameListAdapter extends BaseAdapter {
 

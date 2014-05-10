@@ -33,6 +33,7 @@ public class CreateGameActivity extends Activity {
         setContentView(R.layout.activity_create_game);
         ParseAnalytics.trackAppOpened(getIntent());
 
+
         mChooseGameTypeFragment = new ChooseGameTypeFragment();
         mStartLocalGameFragment = new StartLocalGameFragment();
         mStartOnlineGameFragment = new StartOnlineGameFragment();
@@ -98,14 +99,9 @@ public class CreateGameActivity extends Activity {
         fragmentTransaction.replace(R.id.container, mStartOnlineGameFragment).commit();
         */
 
-        ParseUser currentUser = ParseUser.getCurrentUser();
-        if (currentUser != null) {
+
             Intent intent = new Intent(this, GameListActivity.class);
             startActivity(intent);
-        } else {
-            Intent intent = new Intent(this, userRegisterOrLoginActivity.class);
-            startActivity(intent);
-        }
 
 
 

@@ -9,5 +9,6 @@
     <string name="title_activity_play_with_friend">PlayWithFriendActivity</string>
     <string name="title_activity_add_friend">addFriendActivity</string>
     <string name="title_activity_game_list">GameListActivity</string>
+    <string name="title_activity_friend_list">FriendListActivity</string>
 
 </resources>

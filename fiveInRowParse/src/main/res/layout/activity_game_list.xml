@@ -2,39 +2,118 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin"
     tools:context="com.example.fiveinrowparse.GameListActivity"
     android:orientation="horizontal">
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight="1">
+
+    <TextView
+        android:id="@+id/games_header"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Your Games:"
+        android:textSize="35sp"
+        android:layout_centerHorizontal="true"
+        />
+
 
     <ListView
         android:id="@+id/game_list_view"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_weight="1">
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/games_header">
+
 
         </ListView>
+</RelativeLayout>
     <RelativeLayout
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:background="#000000"
+        android:background="#001CCF"
         android:layout_weight="1">
 
-        <Button
-            android:id="@+id/play_with_friend_button"
+
+        <TextView
+            android:layout_centerHorizontal="true"
+            android:id="@+id/username_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Play with Friend"
-            android:onClick="playWithFriend"/>
+            android:text="You have to login to continue"
+            android:textSize="30sp"/>
     <Button
-        android:layout_toRightOf="@+id/play_with_friend_button"
+        android:id="@+id/open_friendlist_button"
+        android:layout_below="@+id/username_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Add friend"
-        android:onClick="openAddFriendsActivity"/>
+        android:text="challenge a friend"
+        android:onClick="openFriendList"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"/>
+
+
+        <RelativeLayout
+            android:id="@+id/login_layout"
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:orientation="vertical" android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginBottom="20dp">
+
+
+            <EditText
+                android:id="@+id/username_login_textfield"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:hint="Username"
+                android:imeOptions="flagNoExtractUi"/>
+
+            <EditText
+                android:id="@+id/password_login_textfield"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/username_login_textfield"
+                android:hint="Password"
+                android:inputType="textPassword"
+                android:layout_marginTop="12dp"
+                android:imeOptions="flagNoExtractUi"/>
+            <Button
+                android:id="@+id/login_button"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/password_login_textfield"
+                android:text="Login"
+                android:onClick="loginUser"/>
+
+            <Button
+                android:id="@+id/register_Insted_button"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/login_button"
+                android:text="Register"
+                android:onClick="registerUser"/>
+
+
+
         </RelativeLayout>
+
+        <Button
+            android:id="@+id/logout_button"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Logout"
+            android:onClick="logoutUser"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="20dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"/>
+        </RelativeLayout>
+
+
 
 
 
