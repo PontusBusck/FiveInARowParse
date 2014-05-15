@@ -86,6 +86,8 @@ public class MyOnlineBoard extends View {
     private Bitmap boardBackground;
     private String mCurrentGameId;
     Context mContext;
+    private Number mLatestMoveIndex;
+    private Paint mFirtMoveMarker;
 
 
     //Online Variabler
@@ -94,9 +96,10 @@ public class MyOnlineBoard extends View {
 
 
 
-    public MyOnlineBoard(Context context, int[] gameArray, String playerTurn, int myPlayerNumer) {
+    public MyOnlineBoard(Context context, int[] gameArray, String playerTurn, int myPlayerNumer, boolean someOneWon, int winner, Number lastMoveIndex) {
         super(context);
 
+        mLatestMoveIndex = lastMoveIndex;
         detector = new ScaleGestureDetector(getContext(), new ScaleListener());
         mGameArray = gameArray;
 
@@ -106,31 +109,87 @@ public class MyOnlineBoard extends View {
             PLAYER_TURN = myPlayerNumer;
         }
 
+        mSomeOneWon = someOneWon;
+
+
+        int winningPlayer = 0;
+        if(mSomeOneWon){
+            if(winner == 2){
+                winningPlayer = PLAYER_TWO_WON;
+                PLAYER_TURN = 2;
+                checkPlayerWon();
+            } else if(winner == 1) {
+                winningPlayer = PLAYER_ONE_WON;
+                PLAYER_TURN = 1;
+            }
+        }
+
+
 
 
     }
 
-    public MyOnlineBoard(Context context, int[] gameArray, String playerTurn, int myPlayerNumer, AttributeSet attrs) {
+    public MyOnlineBoard(Context context, int[] gameArray, String playerTurn, int myPlayerNumer, boolean someOneWon, int winner, Number lastMoveIndex, AttributeSet attrs) {
         super(context, attrs);
+        mLatestMoveIndex = lastMoveIndex;
+
         mContext = context;
         detector = new ScaleGestureDetector(getContext(), new ScaleListener());
+        mGameArray = gameArray;
+
         mMyPlayerNumber = myPlayerNumer;
 
         if(playerTurn.equals(ParseUser.getCurrentUser().getUsername())){
             PLAYER_TURN = myPlayerNumer;
         }
+
+        mSomeOneWon = someOneWon;
+
+
+        int winningPlayer = 0;
+        if(mSomeOneWon){
+            if(winner == 2){
+                winningPlayer = PLAYER_TWO_WON;
+                PLAYER_TURN = 2;
+                checkPlayerWon();
+            } else if(winner == 1) {
+                winningPlayer = PLAYER_ONE_WON;
+                PLAYER_TURN = 1;
+            }
+        }
+
+
 
     }
 
-    public MyOnlineBoard(Context context, int[] gameArray, String playerTurn,  int myPlayerNumer, AttributeSet attrs, int defStyle) {
+    public MyOnlineBoard(Context context, int[] gameArray, String playerTurn,  int myPlayerNumer, boolean someOneWon, int winner, AttributeSet attrs, int defStyle, Number lastMoveIndex) {
         super(context, attrs, defStyle);
-        mGameArray = gameArray;
+        mLatestMoveIndex = lastMoveIndex;
         detector = new ScaleGestureDetector(getContext(), new ScaleListener());
+        mGameArray = gameArray;
+
         mMyPlayerNumber = myPlayerNumer;
 
         if(playerTurn.equals(ParseUser.getCurrentUser().getUsername())){
             PLAYER_TURN = myPlayerNumer;
         }
+
+        mSomeOneWon = someOneWon;
+
+
+        int winningPlayer = 0;
+        if(mSomeOneWon){
+            if(winner == 2){
+                winningPlayer = PLAYER_TWO_WON;
+                PLAYER_TURN = 2;
+                checkPlayerWon();
+            } else if(winner == 1) {
+                winningPlayer = PLAYER_ONE_WON;
+                PLAYER_TURN = 1;
+            }
+        }
+
+
     }
 
 
@@ -155,16 +214,41 @@ public class MyOnlineBoard extends View {
         emtySquareScaled = Bitmap.createScaledBitmap(emptySquare, parentWidth / mBoardColumns, parentHeight / mBoardRows, false);
         crossSquareScaled = Bitmap.createScaledBitmap(crossSquare, parentWidth / mBoardColumns, parentHeight / mBoardRows, false);
         circleSquareScaled = Bitmap.createScaledBitmap(circleSquare, parentWidth / mBoardColumns, parentHeight / mBoardRows, false);
+
+        mFirtMoveMarker = new Paint();
+        mFirtMoveMarker.setColor(Color.YELLOW);
+        mFirtMoveMarker.setAlpha(128);
+
         //boardBackground = Bitmap.createScaledBitmap(boardBackground, parentWidth, parentHeight, false);
     }
 
-    public void uppdateGame(int[] gameArray, String playerTurn,  int myPlayerNumer){
+    public void uppdateGame(int[] gameArray, String playerTurn,  int myPlayerNumer, boolean someOneWon, int winner, Number lastMoveIndex){
+        mLatestMoveIndex = lastMoveIndex;
         mGameArray = gameArray;
         mMyPlayerNumber = myPlayerNumer;
+        mSomeOneWon = someOneWon;
 
         if(playerTurn.equals(ParseUser.getCurrentUser().getUsername())){
             PLAYER_TURN = myPlayerNumer;
         }
+
+        int winningPlayer = 0;
+        if(mSomeOneWon){
+            if(winner == 2){
+                winningPlayer = PLAYER_TWO_WON;
+                PLAYER_TURN = 2;
+                checkPlayerWon();
+            } else if(winner == 1) {
+                winningPlayer = PLAYER_ONE_WON;
+                PLAYER_TURN = 1;
+            }
+        }
+
+        if (mSomeOneWon) {
+            listener.onSomeoneWon(this, winningPlayer, mGameArray, mLatestMoveIndex);
+
+        }
+
 
 
         invalidate();
@@ -215,9 +299,22 @@ public class MyOnlineBoard extends View {
             for (i = 0; i < mBoardColumns; i++) {
                 if (mGameArray[p] == PLAYER_ONE) {
                     canvas.drawBitmap(crossSquareScaled, i * crossSquareScaled.getWidth(), j * crossSquareScaled.getHeight(), null);
+
+                    if(p == mLatestMoveIndex.intValue()){
+
+                        canvas.drawRect(i * circleSquareScaled.getWidth(), j * circleSquareScaled.getHeight(), i * circleSquareScaled.getWidth()+circleSquareScaled.getWidth(),  j * circleSquareScaled.getHeight()+ circleSquareScaled.getHeight(), mFirtMoveMarker);
+                    }
+
                     p++;
+
                 } else if (mGameArray[p] == PLAYER_TWO) {
                     canvas.drawBitmap(circleSquareScaled, i * circleSquareScaled.getWidth(), j * circleSquareScaled.getHeight(), null);
+
+                    if(p == mLatestMoveIndex.intValue()){
+
+                        canvas.drawRect(i * circleSquareScaled.getWidth(), j * circleSquareScaled.getHeight(), i * circleSquareScaled.getWidth()+circleSquareScaled.getWidth(),  j * circleSquareScaled.getHeight()+ circleSquareScaled.getHeight(), mFirtMoveMarker);
+                    }
+
                     p++;
 
 
@@ -337,6 +434,7 @@ public class MyOnlineBoard extends View {
             Log.d("values", "Value X: " + Math.ceil(x) + " Value y: " + Math.ceil(y) + " arrayPlace: " + arrayPlace.intValue());
 
 
+            mLatestMoveIndex = arrayPlace.intValue();
             if (PLAYER_TURN == PLAYER_ONE && mGameArray[arrayPlace.intValue()] != PLAYER_ONE && mGameArray[arrayPlace.intValue()] != PLAYER_TWO) {
                 mGameArray[arrayPlace.intValue()] = PLAYER_ONE;
                 playerWon = checkPlayerWon();
@@ -350,9 +448,9 @@ public class MyOnlineBoard extends View {
             }
 
             if (!playerWon) {
-                listener.onNextPlayer(this, PLAYER_TURN, mGameArray);
+                listener.onNextPlayer(this, PLAYER_TURN, mGameArray, mLatestMoveIndex);
             } else if (playerWon) {
-                listener.onSomeoneWon(this, winningPlayer, mGameArray);
+                listener.onSomeoneWon(this, winningPlayer, mGameArray, mLatestMoveIndex);
                 mSomeOneWon = true;
             }
 
@@ -361,14 +459,17 @@ public class MyOnlineBoard extends View {
         }
     }
 
-    public void resetTheGame() {
+    //Görs numera endast i activityn
+   /* public void resetTheGame() {
         mGameArray = new int[800];
         PLAYER_TURN = PLAYER_ONE;
         mSomeOneWon = false;
-        listener.onNextPlayer(this, PLAYER_TURN, mGameArray);
+        mLatestMoveIndex = 900; // Skall vara ett nummer utanför gameArray längden
+        listener.onNextPlayer(this, PLAYER_TURN, mGameArray, mLatestMoveIndex);
         invalidate();
-    }
+    }*/
 
+    /* //Tar bort surrender tills vidare
     public void surrenderTheGame() {
         mSomeOneWon = true;
         if (PLAYER_TURN == PLAYER_ONE) {
@@ -378,7 +479,7 @@ public class MyOnlineBoard extends View {
         }
         invalidate();
 
-    }
+    } */
 
     private boolean checkPlayerWon() {
 
@@ -478,9 +579,9 @@ public class MyOnlineBoard extends View {
 
 
     public interface OnProgressChangeListener {
-        void onNextPlayer(View v, int currentPlayer, int[] gameArray);
+        void onNextPlayer(View v, int currentPlayer, int[] gameArray, Number latestMoveIndex);
 
-        void onSomeoneWon(View v, int winningPlayer, int[] gameArray);
+        void onSomeoneWon(View v, int winningPlayer, int[] gameArray, Number latestMoveIndex);
 
     }
 

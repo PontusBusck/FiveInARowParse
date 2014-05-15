@@ -53,6 +53,7 @@
             android:layout_height="wrap_content"
             android:text="Surrender"
             android:layout_alignParentRight="true"
+            android:visibility="invisible"
             android:onClick="surrenderGame"/>
 
         <Button
@@ -69,9 +70,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_toLeftOf="@+id/play_again_button"
-            android:text="Exit"
+            android:text="Lobby"
             android:onClick="exitGame"
-            android:visibility="invisible"/>
+            android:visibility="visible"/>
 
     </RelativeLayout>
 

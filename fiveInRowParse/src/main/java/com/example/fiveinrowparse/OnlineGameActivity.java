@@ -61,6 +61,9 @@ public class OnlineGameActivity extends Activity {
     private String mPlayerTurn;
     private String mOpponentUserId;
     Boolean mStartNewGame = true;
+    Boolean mSomeOneWon = false;
+    private Number mLatestMoveIndex = 900; //Utanför array index
+    private Boolean mGameOver = false;
 
 
     @Override
@@ -89,7 +92,7 @@ public class OnlineGameActivity extends Activity {
 
             mCurrentGameId = getIntent().getStringExtra("gameId");
             mOpponentUserId = getIntent().getStringExtra("fromUserId");
-            startUpAcceptedOnlineGame();
+
 
         } else {
             mStartNewGame = getIntent().getBooleanExtra(START_NEW_GAME_INTENT_STRING, false);
@@ -145,6 +148,10 @@ public class OnlineGameActivity extends Activity {
                     mPlayerTurn = game.getString("playersTurn");
                     playerOneName = game.getString("playerOneName");
                     playerTwoName = game.getString("playerTwoName");
+                    mLatestMoveIndex = game.getNumber("latestMoveIndex");
+                    Boolean someOneWon = game.getBoolean("someOneWon");
+                    mGameOver = game.getBoolean("gameOver");
+                    int winningNumber = game.getNumber("winnerNumber").intValue();
                     if(playerOneName.equals(ParseUser.getCurrentUser().getUsername())){
                         mOpponent = playerTwoName;
                     }else{
@@ -158,11 +165,16 @@ public class OnlineGameActivity extends Activity {
                         myPlayerNumber = 2;
                     }
 
+                    if(mPlayerTurn.equals(ParseUser.getCurrentUser().getUsername())){
+                        currentPlayerString.setText("Your Turn!");
+                    }else{
+
                     currentPlayerString.setText(mPlayerTurn + " " + "turn!");
+                    }
                     mPlayerOneScore.setText(playerOneName + ": " + Integer.toString(mPlayerOneWins));
                     mPlayerTwoScore.setText(playerTwoName + ": " + Integer.toString(mPlayerTwoWins));
 
-                    mGameBoard.uppdateGame(mGameArray, mPlayerTurn, myPlayerNumber);
+                    mGameBoard.uppdateGame(mGameArray, mPlayerTurn, myPlayerNumber, someOneWon, winningNumber, mLatestMoveIndex);
 
                 } else {
                     Toast.makeText(OnlineGameActivity.this, "could not contact the server uppdatethegame", Toast.LENGTH_SHORT).show();
@@ -178,35 +190,6 @@ public class OnlineGameActivity extends Activity {
         }
     };
 
-    public void startUpAcceptedOnlineGame(){
-
-        ParseQuery<ParseObject> query = ParseQuery.getQuery("Games");
-        query.getInBackground(mCurrentGameId, new GetCallback<ParseObject>() {
-            public void done(ParseObject game, ParseException e) {
-                if (e == null) {
-                    mGameArray = gameStringToGameArray(game.getString("gameArray"));
-
-                    Toast.makeText(OnlineGameActivity.this, "old game", Toast.LENGTH_SHORT).show();
-                    if (mGameBoard == null) {
-                        mPlayerTurn = game.getString("playersTurn");
-                        playerOneName = game.getString("playerOneName");
-                        playerTwoName = game.getString("playerTwoName");
-                        if(playerOneName.equals(ParseUser.getCurrentUser().getUsername())){
-                            mOpponent = playerTwoName;
-                        }else{
-                            mOpponent = playerOneName;
-                        }
-                        createTheBoard(mGameArray);
-                        Log.d("TAG", "AcceptedGameStarted");
-                    }
-
-                } else {
-                    Toast.makeText(OnlineGameActivity.this, "could not contact the server <startUpAcceptedGame>", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-
-    }
 
     public void startUpOnlineGame() {
 
@@ -221,7 +204,14 @@ public class OnlineGameActivity extends Activity {
             game.put("playerTwoName", getIntent().getStringExtra(OPPONENT_USER_NAME));
             game.put("playerTwoId", getIntent().getStringExtra(OPPONENT_ID));
             game.put("playersTurn", currentUser.getUsername());
+            game.put("someOneWon", false);
+             game.put("gameOver", false);
+            game.put("winnerNumber", 0);
+            game.put("latestMoveIndex", mLatestMoveIndex);
             game.put("gameArray", Arrays.toString(mGameArray));
+            game.put("playerOneWins", 0);
+            game.put("playerTwoWins", 0);
+            game.put("playerTwoAccepted", false);
             game.saveInBackground(new SaveCallback() {
                 public void done(ParseException e) {
                     if (e == null) {
@@ -230,14 +220,20 @@ public class OnlineGameActivity extends Activity {
                         playerOneName = game.getString("playerOneName");
                         mOpponent = getIntent().getStringExtra(OPPONENT_USER_NAME);
                         mOpponentUserId = getIntent().getStringExtra(OPPONENT_ID);
+                        mPlayerTurn = game.getString("playersTurn");
 
-                        currentPlayerString.setText(game.getString("playersTurn") + " " + "turn!");
+                        if(mPlayerTurn.equals(ParseUser.getCurrentUser().getUsername())){
+                            currentPlayerString.setText("Your Turn!");
+                        }else{
+
+                            currentPlayerString.setText(mPlayerTurn + " " + "turn!");
+                        }
                         mPlayerOneScore.setText(playerOneName + ": " + Integer.toString(mPlayerOneWins));
                         mPlayerTwoScore.setText(playerTwoName + ": " + Integer.toString(mPlayerTwoWins));
 
                         if (mGameBoard == null) {
                             Log.d("No board", "noBoard");
-                            createTheBoard(mGameArray);
+                            createTheBoard(mGameArray, false, 0);
                             notifyTheOtherUserAboutTheGame(mOpponentUserId);
                         }
                         // Saved successfully.
@@ -268,11 +264,19 @@ public class OnlineGameActivity extends Activity {
                             mOpponentUserId = getIntent().getStringExtra(OPPONENT_ID);
                             playerOneName = game.getString("playerOneName");
                             playerTwoName = game.getString("playerTwoName");
+                            mLatestMoveIndex = game.getNumber("latestMoveIndex");
+                            mGameOver = game.getBoolean("gameOver");
+                            mPlayerOneWins = game.getNumber("playerOneWins").intValue();
+                            mPlayerTwoWins = game.getNumber("playerTwoWins").intValue();
+
+
+                            Boolean someOneWon = game.getBoolean("someOneWon");
+                            int winningNumber = game.getNumber("winnerNumber").intValue();
 
                             currentPlayerString.setText(game.getString("playersTurn") + " " + "turn!");
                             mPlayerOneScore.setText(playerOneName + ": " + Integer.toString(mPlayerOneWins));
                             mPlayerTwoScore.setText(playerTwoName + ": " + Integer.toString(mPlayerTwoWins));
-                            createTheBoard(mGameArray);
+                            createTheBoard(mGameArray, someOneWon, winningNumber);
                             Log.d("No board", "noBoard");
                         }
 
@@ -286,7 +290,7 @@ public class OnlineGameActivity extends Activity {
         }
     }
 
-    private void createTheBoard(int[] gameArray) {
+    private void createTheBoard(int[] gameArray, Boolean someOneWon, int winningNumber) {
         int myPlayerNumber;
 
         if(playerOneName.equals(ParseUser.getCurrentUser().getUsername())){
@@ -295,11 +299,13 @@ public class OnlineGameActivity extends Activity {
             myPlayerNumber = 2;
         }
         RelativeLayout container = (RelativeLayout) findViewById(R.id.game_online_board_view);
-        mGameBoard = new MyOnlineBoard(this, gameArray, mPlayerTurn, myPlayerNumber);
+        mGameBoard = new MyOnlineBoard(this, gameArray, mPlayerTurn, myPlayerNumber, someOneWon, winningNumber, mLatestMoveIndex);
         container.addView(mGameBoard);
         mGameBoard.setOnProgressChangeListener(changeListener);
+        mGameBoard.uppdateGame(gameArray, mPlayerTurn, myPlayerNumber, someOneWon, winningNumber, mLatestMoveIndex);
 
     }
+
 
     private void notifyTheOtherUserAboutTheGame(String recivingUserId) {
         ParseQuery userQuery = ParseInstallation.getQuery();
@@ -350,23 +356,33 @@ public class OnlineGameActivity extends Activity {
     public void updateCurrentPlayerState(int playerCode, int[] gameArray) {
 
         if (playerCode == PLAYER_ONE) {
+            if(playerOneName.equals(ParseUser.getCurrentUser().getUsername())){
+                currentPlayerString.setText("Your Turn!");
+            }else{
+
             currentPlayerString.setText(playerOneName + " turn!");
+            }
             uppdateGameOnParse(gameArray);
         } else if (playerCode == PLAYER_TWO) {
+            if(playerTwoName.equals(ParseUser.getCurrentUser().getUsername())){
+                currentPlayerString.setText("Your Turn!");
+            }else{
+
             currentPlayerString.setText(playerTwoName + " turn!");
+            }
             uppdateGameOnParse(gameArray);
         } else if (playerCode == PLAYER_ONE_WON) {
             mPlayerOneWins++;
             mPlayerOneScore.setText(playerOneName + ": " + Integer.toString(mPlayerOneWins));
             someOneWon();
             currentPlayerString.setText(playerOneName + " wins!");
-            uppdateGameOnParse(gameArray);
+            uppdateGameOnParseWinner(gameArray, 1);
         } else if (playerCode == PLAYER_TWO_WON) {
             mPlayerTwoWins++;
             mPlayerTwoScore.setText(playerTwoName + ": " + Integer.toString(mPlayerTwoWins));
             someOneWon();
             currentPlayerString.setText(playerTwoName + " wins!");
-            uppdateGameOnParse(gameArray);
+            uppdateGameOnParseWinner(gameArray, 2);
         }
     }
 
@@ -376,6 +392,7 @@ public class OnlineGameActivity extends Activity {
             public void done(ParseObject game, ParseException e) {
                 if (e == null) {
                     game.put("playersTurn", mOpponent);
+                    game.put("latestMoveIndex", mLatestMoveIndex);
                     game.put("gameArray", Arrays.toString(gameArray));
                     game.saveInBackground(new SaveCallback() {
                         public void done(ParseException e) {
@@ -392,6 +409,39 @@ public class OnlineGameActivity extends Activity {
                 }
             }
         });
+
+    }
+
+    private void uppdateGameOnParseWinner(final int[] gameArray, final int winner) {
+        if(!mGameOver) {
+            ParseQuery<ParseObject> query = ParseQuery.getQuery("Games");
+            query.getInBackground(mCurrentGameId, new GetCallback<ParseObject>() {
+                public void done(ParseObject game, ParseException e) {
+                    if (e == null) {
+                        game.put("playersTurn", mOpponent);
+                        game.put("someOneWon", true);
+                        game.put("winnerNumber", winner);
+                        game.put("gameOver", true);
+                        game.put("latestMoveIndex", mLatestMoveIndex);
+                        game.put("playerOneWins", mPlayerOneWins);
+                        game.put("playerTwoWins", mPlayerTwoWins);
+                        game.put("gameArray", Arrays.toString(gameArray));
+                        game.saveInBackground(new SaveCallback() {
+                            public void done(ParseException e) {
+                                if (e == null) {
+                                    notifyTheOtherUserAboutTheMove(mOpponentUserId);
+
+
+                                } else {
+                                    // The save failed.
+                                    Log.d("tag", "User update error: " + e);
+                                }
+                            }
+                        });
+                    }
+                }
+            });
+        }
 
     }
 
@@ -419,11 +469,13 @@ public class OnlineGameActivity extends Activity {
 
     private MyOnlineBoard.OnProgressChangeListener changeListener = new MyOnlineBoard.OnProgressChangeListener() {
 
-        public void onNextPlayer(View v, int player, int[] gameArray) {
+        public void onNextPlayer(View v, int player, int[] gameArray, Number lastMoveIndex) {
+            mLatestMoveIndex = lastMoveIndex;
             updateCurrentPlayerState(player, gameArray);
         }
 
-        public void onSomeoneWon(View v, int winningPlayer, int[] gameArray) {
+        public void onSomeoneWon(View v, int winningPlayer, int[] gameArray, Number lastMoveIndex) {
+            mLatestMoveIndex = lastMoveIndex;
             updateCurrentPlayerState(winningPlayer, gameArray);
         }
 
@@ -432,24 +484,65 @@ public class OnlineGameActivity extends Activity {
     private void someOneWon() {
 
 
-        mExitButton.setVisibility(View.VISIBLE);
+        //mExitButton.setVisibility(View.VISIBLE);
         mPlayAgainButton.setVisibility(View.VISIBLE);
-        mSurrenderButton.setVisibility(View.INVISIBLE);
+        //mSurrenderButton.setVisibility(View.INVISIBLE);
 
 
     }
 
     public void resetGame(View view) {
-        mGameBoard.resetTheGame();
-        mExitButton.setVisibility(View.INVISIBLE);
+        //mGameBoard.resetTheGame();
+        //mExitButton.setVisibility(View.INVISIBLE);
         mPlayAgainButton.setVisibility(View.INVISIBLE);
-        mSurrenderButton.setVisibility(View.VISIBLE);
+        //mSurrenderButton.setVisibility(View.VISIBLE);
+
+        mGameArray = new int[800];
+        mLatestMoveIndex = 900;
+
+
+        final int myPlayerNumber;
+        if(playerOneName.equals(ParseUser.getCurrentUser().getUsername())){
+            myPlayerNumber = 1;
+        }else{
+            myPlayerNumber = 2;
+        }
+
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Games");
+        query.getInBackground(mCurrentGameId, new GetCallback<ParseObject>() {
+            public void done(ParseObject game, ParseException e) {
+                if (e == null) {
+                    game.put("playersTurn", mOpponent);
+                    game.put("someOneWon", false);
+                    game.put("winnerNumber", 0);
+                    game.put("latestMoveIndex", 900);
+                    game.put("gameOver", false);
+                    game.put("gameArray", Arrays.toString(mGameArray));
+                    game.saveInBackground(new SaveCallback() {
+                        public void done(ParseException e) {
+                            if (e == null) {
+                                notifyTheOtherUserAboutTheMove(mOpponentUserId);
+                                mGameBoard.uppdateGame(mGameArray, mOpponent, myPlayerNumber, false, 0, mLatestMoveIndex);
+                                uppdateTheGame();
+
+
+
+                            } else {
+                                // The save failed.
+                                Log.d("tag", "User update error: " + e);
+                            }
+                        }
+                    });
+                }
+            }
+        });
+
 
     }
 
     public void surrenderGame(View view) {
         someOneWon();
-        mGameBoard.surrenderTheGame();
+       // mGameBoard.surrenderTheGame();
     }
 
     public void exitGame(View view) {

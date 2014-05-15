@@ -1,68 +1,112 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.example.fiveinrowparse.GameListActivity"
-    android:orientation="horizontal">
+    android:orientation="horizontal"
+    android:id="@+id/main_gamelist_layout">
 
     <RelativeLayout
+        android:id="@+id/left_gamelist_Layout"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:background="@color/gray_background_color">
+
+
 
     <TextView
         android:id="@+id/games_header"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Your Games:"
+        android:textColor="#FFFFFF"
         android:textSize="35sp"
+        android:layout_marginBottom="15dp"
+        android:layout_marginTop="15dp"
         android:layout_centerHorizontal="true"
         />
 
 
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/games_header"
+            >
     <ListView
         android:id="@+id/game_list_view"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/games_header">
+        android:layout_centerInParent="true"
+        android:layout_marginLeft="60dp"
+        android:layout_marginRight="60dp"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="8dp">
 
 
         </ListView>
+        </RelativeLayout>
+        <ProgressBar
+            android:id="@+id/progres_spinner_gamelist"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:visibility="gone">
+        </ProgressBar>
+
 </RelativeLayout>
     <RelativeLayout
+        android:id="@+id/right_gamelist_Layout"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:background="#001CCF"
-        android:layout_weight="1">
+        android:layout_alignParentRight="true"
+        android:background="@color/pink_background_color"
+        android:focusable="true"
+        android:focusableInTouchMode="true">
+
 
 
         <TextView
-            android:layout_centerHorizontal="true"
             android:id="@+id/username_label"
+            android:layout_centerHorizontal="true"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:gravity="center"
             android:text="You have to login to continue"
+            android:textColor="@color/gray_background_color"
+            android:textStyle="bold"
             android:textSize="30sp"/>
+
+
     <Button
         android:id="@+id/open_friendlist_button"
-        android:layout_below="@+id/username_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="challenge a friend"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/button_height"
+        android:text="Challenge a friend"
+        android:textColor="#FFFFFF"
         android:onClick="openFriendList"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="20dp"/>
+        android:layout_marginBottom="10dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_above="@+id/logout_button"
+        android:background="@drawable/game_list_button"/>
 
 
         <RelativeLayout
             android:id="@+id/login_layout"
             xmlns:android="http://schemas.android.com/apk/res/android"
-            android:orientation="vertical" android:layout_width="match_parent"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_marginLeft="20dp"
-            android:layout_marginRight="20dp"
-            android:layout_marginBottom="20dp">
+            android:layout_centerInParent="true"
+            android:layout_marginLeft="150dp"
+            android:layout_marginRight="150dp"
+            >
+
+
+
 
 
             <EditText
@@ -70,6 +114,7 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:hint="Username"
+                android:textColorHint="@color/gray_background_color"
                 android:imeOptions="flagNoExtractUi"/>
 
             <EditText
@@ -78,23 +123,30 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/username_login_textfield"
                 android:hint="Password"
+                android:textColorHint="@color/gray_background_color"
                 android:inputType="textPassword"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="20dp"
                 android:imeOptions="flagNoExtractUi"/>
             <Button
                 android:id="@+id/login_button"
                 android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="@dimen/button_height"
                 android:layout_below="@+id/password_login_textfield"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/game_list_button"
                 android:text="Login"
+                android:textColor="#FFFFFF"
                 android:onClick="loginUser"/>
 
             <Button
                 android:id="@+id/register_Insted_button"
                 android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="@dimen/button_height"
                 android:layout_below="@+id/login_button"
                 android:text="Register"
+                android:textColor="#FFFFFF"
+                android:background="@drawable/game_list_button"
+                android:layout_marginTop="10dp"
                 android:onClick="registerUser"/>
 
 
@@ -104,13 +156,39 @@
         <Button
             android:id="@+id/logout_button"
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="@dimen/button_height"
             android:text="Logout"
+            android:textColor="#FFFFFF"
             android:onClick="logoutUser"
+            android:background="@drawable/game_list_button"
+            android:layout_above="@+id/back_button"
+            android:layout_marginBottom="10dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"/>
+
+        <Button
+            android:id="@+id/back_button"
+            android:layout_width="fill_parent"
+            android:layout_height="@dimen/button_height"
+            android:text="Back"
+            android:textColor="#FFFFFF"
+            android:onClick="back"
+            android:background="@drawable/game_list_button"
             android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
             android:layout_marginBottom="20dp"
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"/>
+
+        <ProgressBar
+            android:id="@+id/progres_spinner_login"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:visibility="gone">
+        </ProgressBar>
+
         </RelativeLayout>
 
 
@@ -118,4 +196,4 @@
 
 
 
-</LinearLayout>
+</RelativeLayout>

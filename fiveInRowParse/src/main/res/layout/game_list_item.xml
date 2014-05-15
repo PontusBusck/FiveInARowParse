@@ -1,22 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@drawable/game_list_item_background"
+    >
 
     <TextView
         android:id="@+id/opponent_name_label"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:text="Username"
+        android:layout_marginTop="5dp"
+        android:layout_marginLeft="8dp"
+        android:textSize="20sp"
+        android:textColor="#FFFFFF"/>
 
     <TextView
         android:id="@+id/player_turn_label"
+        android:layout_below="@+id/opponent_name_label"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-    <TextView
-        android:id="@+id/last_move_made"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_marginBottom="5dp"
+        android:text="Game State"
+        android:textColor="#FFFFFF"/>
+    <!--<TextView-->
+        <!--android:id="@+id/last_move_made"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_below="@+id/player_turn_label"-->
+        <!--android:text="date"-->
+        <!--android:textColor="#FFFFFF"/>-->
+
+    <LinearLayout
+        android:id="@+id/right_game_item_layout"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="10dp">
+
+        <TextView
+            android:id="@+id/right_text_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="You have \nnot accepted"
+            android:textAlignment="viewEnd"
+            android:textColor="#9C191C"
+
+            />
+        </LinearLayout>
 
 
-</LinearLayout>
+</RelativeLayout>

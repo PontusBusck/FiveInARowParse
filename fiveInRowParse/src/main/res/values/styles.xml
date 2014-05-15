@@ -5,4 +5,7 @@
         <!-- Customize your theme here. -->
     </style>
 
+    <color name="pink_background_color">#792185</color>
+    <color name="gray_background_color">#242122</color>
+
 </resources>

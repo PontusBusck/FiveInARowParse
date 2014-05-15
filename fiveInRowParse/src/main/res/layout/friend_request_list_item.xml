@@ -6,16 +6,30 @@
     android:background="@drawable/game_list_item_background">
 
     <TextView
-        android:id="@+id/friend_name"
+        android:id="@+id/from_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Template"
-        android:layout_centerInParent="true"
+        android:text="From User"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="8dp"
         android:textColor="#FFFFFF"
         android:textSize="22sp"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
         />
+
+    <TextView
+        android:id="@+id/status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Status"
+        android:layout_centerVertical="true"
+        android:layout_alignParentRight="true"
+        android:textColor="#FFFFFF"
+        android:textSize="12sp"
+        android:layout_marginRight="3dp"
+        />
+
 
 
 

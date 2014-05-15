@@ -8,31 +8,54 @@
     <RelativeLayout
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:background="@color/gray_background_color">
 
     <TextView
          android:id="@+id/friends_header"
          android:layout_width="wrap_content"
          android:layout_height="wrap_content"
          android:text="Your friends:"
+        android:textColor="#FFFFFF"
          android:textSize="35sp"
         android:layout_centerHorizontal="true"/>
 
+        <ListView
+            android:id="@+id/friend_request_list_view"
+            android:layout_below="@+id/friends_header"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_marginLeft="60dp"
+            android:layout_marginRight="60dp"
+            android:divider="@android:color/transparent"
+            android:dividerHeight="8dp"
+            android:layout_marginBottom="8dp">
+
+        </ListView>
+
     <ListView
         android:id="@+id/friend_list_view"
-        android:layout_below="@+id/friends_header"
+        android:layout_below="@+id/friend_request_list_view"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        >
+        android:layout_centerInParent="true"
+        android:layout_marginLeft="60dp"
+        android:layout_marginRight="60dp"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="8dp">
+
 
     </ListView>
 
     </RelativeLayout>
 
+
+
     <RelativeLayout
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:background="#001CCF"
+        android:background="@color/pink_background_color"
         android:layout_weight="1">
 
         <LinearLayout
@@ -41,13 +64,16 @@
             android:orientation="vertical"
             android:layout_centerInParent="true"
             android:layout_marginLeft="20dp"
-            android:layout_marginRight="20dp">
+            android:layout_marginRight="20dp"
+            android:focusable="true"
+            android:focusableInTouchMode="true">
 
         <TextView
             android:id="@+id/add_friend_label"
             android:text="Search for a friend"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textColor="@color/gray_background_color"
             android:textSize="25sp"
             android:layout_centerHorizontal="true"/>
 
@@ -57,6 +83,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/add_friend_label"
             android:layout_marginTop="35dp"
+            android:textColorHint="@color/gray_background_color"
             android:hint="Username"
             android:imeOptions="flagNoExtractUi"/>
 
@@ -66,6 +93,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/search_friend_textfield"
             android:text="Add friend"
+            android:background="@drawable/game_list_button"
             android:onClick="addAFriendButtonClicked"/>
 
         </LinearLayout>
