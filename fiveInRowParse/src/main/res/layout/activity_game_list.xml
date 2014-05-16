@@ -4,7 +4,8 @@
     android:layout_height="match_parent"
     tools:context="com.example.fiveinrowparse.GameListActivity"
     android:orientation="horizontal"
-    android:id="@+id/main_gamelist_layout">
+    android:id="@+id/main_gamelist_layout"
+    android:background="@color/gray_background_color">
 
     <RelativeLayout
         android:id="@+id/left_gamelist_Layout"

@@ -90,13 +90,28 @@
         <Button
             android:id="@+id/add_friend_search_button"
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="@dimen/button_height"
             android:layout_below="@+id/search_friend_textfield"
             android:text="Add friend"
+            android:textColor="#FFFFFF"
             android:background="@drawable/game_list_button"
             android:onClick="addAFriendButtonClicked"/>
 
         </LinearLayout>
+
+        <Button
+            android:id="@+id/back_button"
+            android:layout_width="fill_parent"
+            android:layout_height="@dimen/button_height"
+            android:text="Back"
+            android:textColor="#FFFFFF"
+            android:onClick="back"
+            android:background="@drawable/game_list_button"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_marginBottom="20dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"/>
 
 
     </RelativeLayout>

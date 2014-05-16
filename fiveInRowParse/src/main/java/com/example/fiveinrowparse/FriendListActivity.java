@@ -19,6 +19,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.parse.DeleteCallback;
 import com.parse.FindCallback;
 import com.parse.GetCallback;
 import com.parse.ParseException;
@@ -44,6 +45,8 @@ public class FriendListActivity extends Activity {
     private List<ParseObject> mAllFriendRequestsList;
     private FriendRequestAdapter mFriendRequestsAdapter;
     private ListView mFriendRequestsListView;
+    private ArrayList<String> mAllFriendsRequestUsersId = new ArrayList<String>();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -152,32 +155,59 @@ public class FriendListActivity extends Activity {
                 public void done(List<ParseUser> objects, ParseException e) {
                     if (e == null && objects.size() > 0) {
 
-                        Toast.makeText(FriendListActivity.this, "found user", Toast.LENGTH_SHORT).show();
-
-                        ParseObject FriendRequest = new ParseObject("FriendRequests");
-                        FriendRequest.put("fromName", ParseUser.getCurrentUser().getUsername());
-                        FriendRequest.put("fromId", ParseUser.getCurrentUser().getObjectId());
-                        FriendRequest.put("toName", objects.get(0).getUsername());
-                        FriendRequest.put("toNameIndexing", objects.get(0).getUsername());
-                        FriendRequest.put("toId", objects.get(0).getObjectId());
-                        FriendRequest.put("status", "Pending");
-                        FriendRequest.saveInBackground(new SaveCallback() {
-                            public void done(ParseException e) {
-                                if (e == null) {
-                                    uppdateFriendRequests();
-                                    Toast.makeText(FriendListActivity.this, "added user", Toast.LENGTH_SHORT).show();
+                        //Visar en dialog som hindrar att man lägger till en vänn om man redan har en pending request, eller om man redan är vänn
+                        if (mFriendIdsArrayList.contains(objects.get(0).getObjectId()) || mAllFriendsRequestUsersId.contains(objects.get(0).getObjectId())) {
 
 
-                                    //TODO send new request push
-
-
-                                } else {
-                                    // The save failed.
-                                    Log.d("tag", "Could not save resquest" + e);
+                            final AlertDialog alertDialog = new AlertDialog.Builder(FriendListActivity.this).create();
+                            alertDialog.setMessage("Could not send a friendrequest to " + objects.get(0).getUsername() + ". This may be because you already have this user as a friend, or already have a friendrequest pending." );
+                            alertDialog.setButton(DialogInterface.BUTTON_NEUTRAL, "Ok", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    alertDialog.dismiss();
                                 }
-                            }
-                        });
+                            });
+                            //alertDialog.setIcon(R.drawable.icon);
+                            alertDialog.show();
 
+
+                        } else if(objects.get(0).getObjectId().equals(ParseUser.getCurrentUser().getObjectId())){
+                            final AlertDialog alertDialog = new AlertDialog.Builder(FriendListActivity.this).create();
+                            alertDialog.setMessage("You can not send a friendrequest to yourself!" );
+                            alertDialog.setButton(DialogInterface.BUTTON_NEUTRAL, "Ok", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    alertDialog.dismiss();
+                                }
+                            });
+                            //alertDialog.setIcon(R.drawable.icon);
+                            alertDialog.show();
+                        } else{
+
+                            Toast.makeText(FriendListActivity.this, "found user", Toast.LENGTH_SHORT).show();
+
+                            ParseObject FriendRequest = new ParseObject("FriendRequests");
+                            FriendRequest.put("fromName", ParseUser.getCurrentUser().getUsername());
+                            FriendRequest.put("fromId", ParseUser.getCurrentUser().getObjectId());
+                            FriendRequest.put("toName", objects.get(0).getUsername());
+                            FriendRequest.put("toNameIndexing", objects.get(0).getUsername());
+                            FriendRequest.put("toId", objects.get(0).getObjectId());
+                            FriendRequest.put("status", "Pending");
+                            FriendRequest.saveInBackground(new SaveCallback() {
+                                public void done(ParseException e) {
+                                    if (e == null) {
+                                        uppdateFriendRequests();
+                                        Toast.makeText(FriendListActivity.this, "added user", Toast.LENGTH_SHORT).show();
+
+                                        //TODO send new request push
+
+                                    } else {
+
+                                        Log.d("tag", "Could not save resquest" + e);
+                                    }
+                                }
+                            });
+                        }
 
                     } else {
                         Toast.makeText(FriendListActivity.this, "found no user with that username!", Toast.LENGTH_SHORT).show();
@@ -238,28 +268,45 @@ public class FriendListActivity extends Activity {
         mainQuery.findInBackground(new FindCallback<ParseObject>() {
             public void done(List<ParseObject> friendRequests, ParseException e) {
                 if (e == null) {
-
                     mAllFriendRequestsList = sortOutAcceptedRequestsAndAddTheFriends(friendRequests);
-
                     mFriendRequestsListView = (ListView) findViewById(R.id.friend_request_list_view);
                     mFriendRequestsAdapter = new FriendRequestAdapter(FriendListActivity.this, mAllFriendRequestsList);
                     mFriendRequestsListView.setAdapter(mFriendRequestsAdapter);
-                    mFriendRequestsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
-                        public void onItemClick(AdapterView<?> parent, View view, int position,
-                                                long id) {
-
-
-                            final ParseObject requestToAccept = (ParseObject) mFriendRequestsAdapter.getItem(position);
-
-                            if(requestToAccept.getString("toName").equals(ParseUser.getCurrentUser().getUsername())){
-
-                            showAcceptFriendDialog(requestToAccept);
-                            }
-
-
+                    //Sparar alla IDs på användare för att se så att man inte utmanar samma användare flera gånger
+                    for (int i = 0; i < mAllFriendRequestsList.size(); i++) {
+                        if (!mAllFriendRequestsList.get(i).getString("fromId").equals(ParseUser.getCurrentUser().getObjectId())) {
+                            mAllFriendsRequestUsersId.add(mAllFriendRequestsList.get(i).getString("fromId"));
                         }
 
+                        if (!mAllFriendRequestsList.get(i).getString("toId").equals(ParseUser.getCurrentUser().getObjectId())) {
+                            mAllFriendsRequestUsersId.add(mAllFriendRequestsList.get(i).getString("toId"));
+                        }
+                    }
+
+                    mFriendRequestsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+                        public void onItemClick(AdapterView<?> parent, View view, int position, //Accepterar någon annans friend request
+                                                long id) {
+                            ParseObject requestToAccept = (ParseObject) mFriendRequestsAdapter.getItem(position);
+                            if (requestToAccept.getString("toName").equals(ParseUser.getCurrentUser().getUsername())) {
+                                showAcceptFriendDialog(requestToAccept);
+                            }
+                        }
+                    });
+
+                    mFriendRequestsListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+
+                        @Override
+                        public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) { //Visar dialog för att radera gammalt request
+                            ParseObject requestToDelete = (ParseObject) mFriendRequestsAdapter.getItem(position);
+                            if (requestToDelete.getString("status").equals("declined")) {
+                                showDeleteOldRequestDialog(requestToDelete);
+
+                            }
+
+                            return false;
+                        }
                     });
                 } else {
                     Toast.makeText(FriendListActivity.this, "Could not get new friend requests", Toast.LENGTH_SHORT).show();
@@ -271,7 +318,7 @@ public class FriendListActivity extends Activity {
         });
     }
 
-    public List<ParseObject> sortOutAcceptedRequestsAndAddTheFriends(List<ParseObject> friendRequests){
+    public List<ParseObject> sortOutAcceptedRequestsAndAddTheFriends(List<ParseObject> friendRequests) {
 
         ArrayList<String> ListOfUsersToFriend = new ArrayList<String>();
 
@@ -290,25 +337,25 @@ public class FriendListActivity extends Activity {
             }
         }
 
-       //Log.d("UsersToReturafterTofriend", Integer.toString(ListOfUsersToFriend.size()) + " " + ListOfUsersToFriend.get(0));
-      //  Log.d("UsersToReturafter", Integer.toString(ListOfUsersToReturn.size())+ " " + ListOfUsersToReturn.get(0).getString("status"));
+        //Log.d("UsersToReturafterTofriend", Integer.toString(ListOfUsersToFriend.size()) + " " + ListOfUsersToFriend.get(0));
+        //  Log.d("UsersToReturafter", Integer.toString(ListOfUsersToReturn.size())+ " " + ListOfUsersToReturn.get(0).getString("status"));
 
-        if(ListOfUsersToFriend.size() > 0){
+        if (ListOfUsersToFriend.size() > 0) {
 
-        addAcceptedRequestsAsFriends(ListOfUsersToFriend);
-        } else{
+            addAcceptedRequestsAsFriends(ListOfUsersToFriend);
+        } else {
             uppdateFriendListView();
         }
 
         return ListOfUsersToReturn;
     }
 
-    public void addAcceptedRequestsAsFriends(ArrayList<String> friendList){
+    public void addAcceptedRequestsAsFriends(ArrayList<String> friendList) {
 
         ArrayList<String> currentFriendList = friendStringToFriendArray(ParseUser.getCurrentUser().getString("friendIds"));
         currentFriendList.addAll(friendList);
         ParseUser.getCurrentUser().put("friendIds", Arrays.toString(currentFriendList.toArray()));
-        ParseUser.getCurrentUser().saveInBackground( new SaveCallback() {
+        ParseUser.getCurrentUser().saveInBackground(new SaveCallback() {
             @Override
             public void done(ParseException e) {
                 uppdateFriendListView();
@@ -319,7 +366,44 @@ public class FriendListActivity extends Activity {
 
     }
 
-    public void showAcceptFriendDialog(final ParseObject request){
+    public void showDeleteOldRequestDialog(ParseObject request) {
+        final ParseObject requestToRemove = request;
+
+        AlertDialog.Builder builder1 = new AlertDialog.Builder(this);
+        builder1.setMessage("Do you want to remove this old request?");
+        builder1.setCancelable(true);
+        builder1.setPositiveButton("Yes",
+
+                // Tar bort requesten och uppdaterar listviews
+                new DialogInterface.OnClickListener() {
+                    public void onClick(final DialogInterface dialog, int id) {
+                        requestToRemove.deleteInBackground(new DeleteCallback() {
+                            @Override
+                            public void done(ParseException e) {
+                                uppdateFriendRequests();
+                            }
+                        });
+
+                    }
+                }
+        );
+        builder1.setNegativeButton("No",
+
+                //Gör inget om man klickar nej
+                new DialogInterface.OnClickListener() {
+                    public void onClick(final DialogInterface dialog, int id) {
+
+
+                    }
+                }
+        );
+
+        AlertDialog acceptGameAlert = builder1.create();
+        acceptGameAlert.show();
+    }
+
+
+    public void showAcceptFriendDialog(final ParseObject request) {
         final ParseObject requestToAccept = request;
 
         AlertDialog.Builder builder1 = new AlertDialog.Builder(this);
@@ -367,10 +451,16 @@ public class FriendListActivity extends Activity {
                         });
 
                     }
-                });
+                }
+        );
 
         AlertDialog acceptGameAlert = builder1.create();
         acceptGameAlert.show();
+    }
+
+    //Klick on back button
+    public void back(View view) {
+        finish();
     }
 
 
@@ -461,19 +551,19 @@ public class FriendListActivity extends Activity {
             ParseObject friend = mFriends.get(position);
 
 
-            if(!friend.getString("fromName").equals(ParseUser.getCurrentUser().getUsername())){
+            if (!friend.getString("fromName").equals(ParseUser.getCurrentUser().getUsername())) {
                 ((TextView) convertView.findViewById(R.id.from_name)).setText(friend.getString("fromName"));
-            }else{
+            } else {
                 ((TextView) convertView.findViewById(R.id.from_name)).setText(friend.getString("toName"));
             }
 
             if (friend.getString("status").equals("Pending")) {
                 if (friend.getString("fromName").equals(ParseUser.getCurrentUser().getUsername())) {
                     ((TextView) convertView.findViewById(R.id.status)).setText("Sent");
-                }else{
+                } else {
                     ((TextView) convertView.findViewById(R.id.status)).setText("New request");
                 }
-            } else{
+            } else {
                 ((TextView) convertView.findViewById(R.id.status)).setText(friend.getString("status"));
             }
 
