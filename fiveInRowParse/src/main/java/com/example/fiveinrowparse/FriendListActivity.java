@@ -2,8 +2,11 @@ package com.example.fiveinrowparse;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -16,6 +19,7 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,10 +27,15 @@ import com.parse.DeleteCallback;
 import com.parse.FindCallback;
 import com.parse.GetCallback;
 import com.parse.ParseException;
+import com.parse.ParseInstallation;
 import com.parse.ParseObject;
+import com.parse.ParsePush;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,6 +55,8 @@ public class FriendListActivity extends Activity {
     private FriendRequestAdapter mFriendRequestsAdapter;
     private ListView mFriendRequestsListView;
     private ArrayList<String> mAllFriendsRequestUsersId = new ArrayList<String>();
+    private ProgressBar mSearchSpinner;
+    private ProgressBar mLoadSpinner;
 
 
     @Override
@@ -55,10 +66,34 @@ public class FriendListActivity extends Activity {
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_friend_list);
 
+        mSearchSpinner = (ProgressBar) findViewById(R.id.progres_spinner_search_friend);
+        mLoadSpinner  = (ProgressBar) findViewById(R.id.progres_spinner_friendlist);
         mFriendIdsArrayList = friendStringToFriendArray(ParseUser.getCurrentUser().getString("friendIds"));
         uppdateFriendRequests();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        MainApplication.friendListIsVisibe();
+        registerReceiver(broadcastReceiver, new IntentFilter("com.busck.UPPDATE_FRIENDLIST"));
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        MainApplication.friendLiIsNotVisible();
+        unregisterReceiver(broadcastReceiver);
+
+    }
+
+    BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            uppdateFriendRequests();
+        }
+    };
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -81,6 +116,7 @@ public class FriendListActivity extends Activity {
     }
 
     private void uppdateFriendListView() {
+        mLoadSpinner.setVisibility(View.VISIBLE);
         mFriendIdsArrayList.clear();
         final String friendIdsString = ParseUser.getCurrentUser().getString("friendIds");
         if (friendIdsString != null) {
@@ -102,22 +138,44 @@ public class FriendListActivity extends Activity {
                     mFriendListView.setAdapter(mFriendAdapter);
                     mFriendListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
+                        //Visar en dialog som frågar om man vill starta ett spel med vännen när man klickar på den
                         public void onItemClick(AdapterView<?> parent, View view, int position,
                                                 long id) {
 
-                            ParseUser friendToChallange = (ParseUser) mFriendAdapter.getItem(position);
-                            Intent intent = new Intent(FriendListActivity.this, OnlineGameActivity.class);
-                            intent.putExtra(OPPONENT_USER_NAME, friendToChallange.getUsername());
-                            intent.putExtra(OPPONENT_ID, friendToChallange.getObjectId());
-                            intent.putExtra(START_NEW_GAME_INTENT_STRING, true);
+                            final ParseUser friendToChallange = (ParseUser) mFriendAdapter.getItem(position);
 
-                            startActivity(intent);
+                            final AlertDialog alertDialog = new AlertDialog.Builder(FriendListActivity.this).create();
+                            alertDialog.setMessage("Do you want to send a game invite to " + friendToChallange.getUsername() + "?" );
+                            alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, "Yes", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    Intent intent = new Intent(FriendListActivity.this, OnlineGameActivity.class);
+                                    intent.putExtra(OPPONENT_USER_NAME, friendToChallange.getUsername());
+                                    intent.putExtra(OPPONENT_ID, friendToChallange.getObjectId());
+                                    intent.putExtra(START_NEW_GAME_INTENT_STRING, true);
+
+                                    startActivity(intent);
+                                    alertDialog.dismiss();
+                                }
+                            });
+
+                            alertDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "No", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    alertDialog.dismiss();
+                                }
+                            });
+                            //alertDialog.setIcon(R.drawable.icon);
+                            alertDialog.show();
+
                         }
 
                     });
                 } else {
                     Log.d("friendObject", "wentWrong");
                 }
+
+                mLoadSpinner.setVisibility(View.GONE);
             }
         });
 
@@ -147,12 +205,14 @@ public class FriendListActivity extends Activity {
 
     public void addAFriendButtonClicked(View view) {
         EditText friendName = (EditText) findViewById(R.id.search_friend_textfield);
+        mSearchSpinner.setVisibility(View.VISIBLE);
 
         if (friendName.getText() != null) {
             ParseQuery<ParseUser> query = ParseUser.getQuery();
             query.whereEqualTo("username", friendName.getText().toString());
             query.findInBackground(new FindCallback<ParseUser>() {
-                public void done(List<ParseUser> objects, ParseException e) {
+                public void done(final List<ParseUser> objects, ParseException e) {
+                    mSearchSpinner.setVisibility(View.GONE);
                     if (e == null && objects.size() > 0) {
 
                         //Visar en dialog som hindrar att man lägger till en vänn om man redan har en pending request, eller om man redan är vänn
@@ -171,6 +231,7 @@ public class FriendListActivity extends Activity {
                             alertDialog.show();
 
 
+                            //Visar en dialog om man försöker att lägga till sig själv som vänn
                         } else if(objects.get(0).getObjectId().equals(ParseUser.getCurrentUser().getObjectId())){
                             final AlertDialog alertDialog = new AlertDialog.Builder(FriendListActivity.this).create();
                             alertDialog.setMessage("You can not send a friendrequest to yourself!" );
@@ -182,7 +243,7 @@ public class FriendListActivity extends Activity {
                             });
                             //alertDialog.setIcon(R.drawable.icon);
                             alertDialog.show();
-                        } else{
+                        } else{  //Skapar och sparar vännrequesten
 
                             Toast.makeText(FriendListActivity.this, "found user", Toast.LENGTH_SHORT).show();
 
@@ -199,7 +260,8 @@ public class FriendListActivity extends Activity {
                                         uppdateFriendRequests();
                                         Toast.makeText(FriendListActivity.this, "added user", Toast.LENGTH_SHORT).show();
 
-                                        //TODO send new request push
+                                        notifyTheOtherUserAboutTheFriendInvite(objects.get(0).getObjectId());
+
 
                                     } else {
 
@@ -217,6 +279,27 @@ public class FriendListActivity extends Activity {
 
         }
 
+
+    }
+
+    private void notifyTheOtherUserAboutTheFriendInvite(String recivingUserId) {
+        ParseQuery userQuery = ParseInstallation.getQuery();
+        userQuery.whereEqualTo("userId", recivingUserId);
+
+        JSONObject data = new JSONObject();
+        try {
+            data.put("action", "com.example.NEW_FRIEND_REQUEST");
+            data.put("fromUser", ParseUser.getCurrentUser().getUsername());
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        ParsePush parsePush = new ParsePush();
+        parsePush.setQuery(userQuery);
+        parsePush.setMessage("New game invite");
+        parsePush.setData(data);
+        parsePush.sendInBackground();
 
     }
 
@@ -251,6 +334,7 @@ public class FriendListActivity extends Activity {
     }*/
 
     public void uppdateFriendRequests() {
+        mLoadSpinner.setVisibility(View.VISIBLE); //Visar spinnern
 
         //Hämtar alla friend requests där som man antingen skickat eller fått
         ParseQuery<ParseObject> queryTo = ParseQuery.getQuery("FriendRequests");
@@ -312,7 +396,10 @@ public class FriendListActivity extends Activity {
                     Toast.makeText(FriendListActivity.this, "Could not get new friend requests", Toast.LENGTH_SHORT).show();
                     //Log.d("error start old game", e.);
                 }
+
+                mLoadSpinner.setVisibility(View.GONE); //Döljer spinnern
             }
+
 
 
         });

@@ -15,6 +15,8 @@ import android.view.Display;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.ScaleAnimation;
 import android.widget.Toast;
 
 
@@ -88,6 +90,7 @@ public class MyOnlineBoard extends View {
     Context mContext;
     private Number mLatestMoveIndex;
     private Paint mFirtMoveMarker;
+    private String mTheme;
 
 
     //Online Variabler
@@ -96,9 +99,10 @@ public class MyOnlineBoard extends View {
 
 
 
-    public MyOnlineBoard(Context context, int[] gameArray, String playerTurn, int myPlayerNumer, boolean someOneWon, int winner, Number lastMoveIndex) {
+    public MyOnlineBoard(Context context, int[] gameArray, String playerTurn, int myPlayerNumer, boolean someOneWon, int winner, Number lastMoveIndex, String theme) {
         super(context);
 
+        mTheme = theme;
         mLatestMoveIndex = lastMoveIndex;
         detector = new ScaleGestureDetector(getContext(), new ScaleListener());
         mGameArray = gameArray;
@@ -129,10 +133,10 @@ public class MyOnlineBoard extends View {
 
     }
 
-    public MyOnlineBoard(Context context, int[] gameArray, String playerTurn, int myPlayerNumer, boolean someOneWon, int winner, Number lastMoveIndex, AttributeSet attrs) {
+    public MyOnlineBoard(Context context, int[] gameArray, String playerTurn, int myPlayerNumer, boolean someOneWon, int winner, Number lastMoveIndex, String theme, AttributeSet attrs) {
         super(context, attrs);
         mLatestMoveIndex = lastMoveIndex;
-
+        mTheme = theme;
         mContext = context;
         detector = new ScaleGestureDetector(getContext(), new ScaleListener());
         mGameArray = gameArray;
@@ -162,8 +166,9 @@ public class MyOnlineBoard extends View {
 
     }
 
-    public MyOnlineBoard(Context context, int[] gameArray, String playerTurn,  int myPlayerNumer, boolean someOneWon, int winner, AttributeSet attrs, int defStyle, Number lastMoveIndex) {
+    public MyOnlineBoard(Context context, int[] gameArray, String playerTurn,  int myPlayerNumer, boolean someOneWon, int winner, AttributeSet attrs, int defStyle, Number lastMoveIndex, String theme) {
         super(context, attrs, defStyle);
+        mTheme = theme;
         mLatestMoveIndex = lastMoveIndex;
         detector = new ScaleGestureDetector(getContext(), new ScaleListener());
         mGameArray = gameArray;
@@ -207,16 +212,23 @@ public class MyOnlineBoard extends View {
         paint = new Paint();
         paint.setColor(Color.BLUE);
         rect = new Rect(0, 0, parentWidth, parentHeight);
-        emptySquare = BitmapFactory.decodeResource(getResources(), R.drawable.emtysquare);
-        crossSquare = BitmapFactory.decodeResource(getResources(), R.drawable.cross);
-        circleSquare = BitmapFactory.decodeResource(getResources(), R.drawable.circle);
+        if(mTheme.equals("dark")){
+            emptySquare = BitmapFactory.decodeResource(getResources(), R.drawable.emtysquare);
+            crossSquare = BitmapFactory.decodeResource(getResources(), R.drawable.cross);
+            circleSquare = BitmapFactory.decodeResource(getResources(), R.drawable.circle);
+        } else{
+            emptySquare = BitmapFactory.decodeResource(getResources(), R.drawable.light_emtysquare);
+            crossSquare = BitmapFactory.decodeResource(getResources(), R.drawable.light_cross);
+            circleSquare = BitmapFactory.decodeResource(getResources(), R.drawable.light_circle);
+        }
+
         //boardBackground = BitmapFactory.decodeResource(getResources(), R.drawable.gameboardbackground);
         emtySquareScaled = Bitmap.createScaledBitmap(emptySquare, parentWidth / mBoardColumns, parentHeight / mBoardRows, false);
         crossSquareScaled = Bitmap.createScaledBitmap(crossSquare, parentWidth / mBoardColumns, parentHeight / mBoardRows, false);
         circleSquareScaled = Bitmap.createScaledBitmap(circleSquare, parentWidth / mBoardColumns, parentHeight / mBoardRows, false);
 
         mFirtMoveMarker = new Paint();
-        mFirtMoveMarker.setColor(Color.YELLOW);
+        mFirtMoveMarker.setColor(Color.parseColor("#c60b39"));
         mFirtMoveMarker.setAlpha(128);
 
         //boardBackground = Bitmap.createScaledBitmap(boardBackground, parentWidth, parentHeight, false);
@@ -298,11 +310,13 @@ public class MyOnlineBoard extends View {
             int i = 0;
             for (i = 0; i < mBoardColumns; i++) {
                 if (mGameArray[p] == PLAYER_ONE) {
-                    canvas.drawBitmap(crossSquareScaled, i * crossSquareScaled.getWidth(), j * crossSquareScaled.getHeight(), null);
+                     canvas.drawBitmap(crossSquareScaled, i * crossSquareScaled.getWidth(), j * crossSquareScaled.getHeight(), null);
 
                     if(p == mLatestMoveIndex.intValue()){
 
                         canvas.drawRect(i * circleSquareScaled.getWidth(), j * circleSquareScaled.getHeight(), i * circleSquareScaled.getWidth()+circleSquareScaled.getWidth(),  j * circleSquareScaled.getHeight()+ circleSquareScaled.getHeight(), mFirtMoveMarker);
+
+
                     }
 
                     p++;

@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.example.fiveinrowparse.LocalGameActivity"
-    android:background="#FF0000"
+    android:background="#3b3738"
     android:id="@+id/main_layout">
 
 
@@ -12,7 +12,7 @@
         android:layout_width="fill_parent"
         android:layout_height="50dp"
         android:layout_alignParentBottom="true"
-        android:background="#000000">
+        android:background="@color/gray_background_color">
 
 
         <TextView
@@ -23,7 +23,7 @@
             android:layout_centerVertical="true"
             android:text="Player one"
             android:textSize="30sp"
-            android:textColor="#0933B3"/>
+            android:textColor="@color/pink_background_color"/>
 
         <TextView
             android:id="@+id/player_one_score"
@@ -34,7 +34,8 @@
             android:layout_marginLeft="12dp"
             android:layout_marginTop="6dp"
             android:layout_alignParentTop="true"
-            android:textColor="#0933B3"/>
+            android:textColor="@color/pink_background_color"/>
+
 
         <TextView
             android:id="@+id/player_two_score"
@@ -45,42 +46,114 @@
             android:layout_toRightOf="@+id/player_turn_string"
             android:layout_alignParentBottom="true"
             android:text="scorePlayerTwo"
-            android:textColor="#0933B3"/>
+            android:textColor="@color/pink_background_color"/>
+
+
 
         <Button
-            android:id="@+id/surrender_button"
+            android:id="@+id/return_lobby_button"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Surrender"
-            android:layout_alignParentRight="true"
-            android:visibility="invisible"
-            android:onClick="surrenderGame"/>
+            android:layout_height="@dimen/button_height"
+            android:layout_toLeftOf= "@+id/menu_button"
+            android:background="@drawable/game_list_item_background"
+            android:text="Lobby"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="4dp"
+            android:layout_marginLeft="20dp"
+            android:textColor="#FFFFFF"
+            android:onClick="exitGame"
+            android:visibility="visible"/>
 
         <Button
             android:id="@+id/play_again_button"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_toLeftOf="@+id/surrender_button"
+            android:layout_height="@dimen/button_height"
+            android:layout_toLeftOf="@+id/return_lobby_button"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="4dp"
             android:text="Play again"
+            android:textColor="#FFFFFF"
             android:onClick="resetGame"
-            android:visibility="invisible"/>
+            android:visibility="invisible"
+            android:background="@drawable/game_list_item_background"/>
 
         <Button
-            android:id="@+id/end_game_button"
+            android:id="@+id/menu_button"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_toLeftOf="@+id/play_again_button"
-            android:text="Lobby"
-            android:onClick="exitGame"
-            android:visibility="visible"/>
+            android:layout_height="@dimen/button_height"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="20dp"
+            android:text="Menu"
+            android:textColor="#FFFFFF"
+            android:onClick="openMenu"
+            android:background="@drawable/game_list_item_background"/>
+
+        <RelativeLayout
+            android:id="@+id/menu_layout"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_alignParentBottom="true"
+            android:visibility="invisible"
+            android:clickable="true"
+            android:background="@color/gray_background_color"
+            >
+
+            <Button
+                android:id="@+id/dark_theme_button"
+                android:tag="dark"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/button_height"
+                android:layout_centerVertical="true"
+                android:text="Dark theme"
+                android:textColor="#FFFFFF"
+                android:layout_alignParentLeft="true"
+                android:background="@drawable/game_list_item_background"
+                android:onClick="ChangeThemeButton"
+                />
+
+            <Button
+                android:id="@+id/light_theme_button"
+                android:tag="light"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/button_height"
+                android:layout_centerVertical="true"
+                android:text="Light theme"
+                android:layout_toRightOf="@+id/dark_theme_button"
+                android:textColor="#FFFFFF"
+                android:background="@drawable/game_list_item_background"
+                android:layout_marginLeft="20dp"
+                android:onClick="ChangeThemeButton"
+                />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/button_height"
+                android:layout_alignParentRight="true"
+                android:layout_marginLeft="20dp"
+                android:layout_centerVertical="true"
+                android:text="Close"
+
+                android:textColor="#FFFFFF"
+                android:onClick="openMenu"
+                android:background="@drawable/game_list_item_background"/>
+
+        </RelativeLayout>
 
     </RelativeLayout>
+
+
 
     <RelativeLayout
         android:id="@+id/game_online_board_view"
         android:layout_above="@id/game_stats_layout"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent" />
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        </RelativeLayout>
+
+
+
 
 
 

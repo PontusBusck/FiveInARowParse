@@ -10,5 +10,6 @@
     <string name="title_activity_add_friend">addFriendActivity</string>
     <string name="title_activity_game_list">GameListActivity</string>
     <string name="title_activity_friend_list">FriendListActivity</string>
+    <string name="title_activity_setup_local_game">setupLocalGame</string>
 
 </resources>

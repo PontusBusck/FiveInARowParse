@@ -1,10 +1,14 @@
 package com.example.fiveinrowparse;
 
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
@@ -21,12 +25,12 @@ public class MyPushReciver extends BroadcastReceiver {
     public static final String ACTION_SYSTEM_BECOMES_INACTIVE = "com.busck.SYSTEM_BECOMES_INACTIVE";
     public static final String ACTION_NEW_PLAYER_MOVE = "com.busck.NEW_PLAYER_MOVE";
     public  static final String ACTION_NEW_GAME_INVITE = "com.example.NEW_GAME_INVITE";
+    public  static final String ACTION_NEW_FRIEND_REQUEST = "com.example.NEW_FRIEND_REQUEST";
     public MyPushReciver() {
     }
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.d("recivertest", Boolean.toString(MainApplication.isIsOnlineGameVisible()));
         Context appContext = context.getApplicationContext();
         if(intent !=null) {
 
@@ -43,7 +47,6 @@ public class MyPushReciver extends BroadcastReceiver {
                            fromUser = json.getString("fromUser");
                            fromUserId = json.getString("fromUserId");
                            gameId = json.getString("gameId");
-                           Log.d("com.busck.taxikurrir", "Min json: " + fromUser + " " + gameId);
 
                        } catch (JSONException e) {
                            e.printStackTrace();
@@ -65,9 +68,12 @@ public class MyPushReciver extends BroadcastReceiver {
                    PendingIntent pendingNotificationIntent = PendingIntent.getActivity(appContext, 1, acceptInvite, PendingIntent.FLAG_UPDATE_CURRENT);
 
 
+
                    NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(appContext)
                            .setAutoCancel(true)
+                           .setLights(Color.parseColor("#B303A2"), 2000, 200)
                            .setSmallIcon(R.drawable.ic_launcher)
+                           .setDefaults(Notification.DEFAULT_VIBRATE | Notification.DEFAULT_SOUND )
                            .setContentTitle("Challanged")
                            .setContentIntent(pendingNotificationIntent)
                            .setContentText("You have been challenged by " + fromUser + "!");
@@ -90,7 +96,6 @@ public class MyPushReciver extends BroadcastReceiver {
                            fromUser = json.getString("fromUser");
                            fromUserId = json.getString("fromUserId");
                            gameId = json.getString("gameId");
-                           Log.d("com.busck.taxikurrir", "Min json: " + fromUser + " " + gameId);
 
                        } catch (JSONException e) {
                            e.printStackTrace();
@@ -101,7 +106,7 @@ public class MyPushReciver extends BroadcastReceiver {
                    if(MainApplication.isIsOnlineGameVisible()){
                        //Skickar iväg en broadcast till min OnlineGameActivity om den är öppen
                        context.sendBroadcast(new Intent("com.busck.UPPDATE_THE_GAME"));
-                       Log.d("recivertest", "AlTheWay");
+
                    } else {
                        //Skickar notification om den är stängd
                        Intent notificationIntent = new Intent(appContext, GameListActivity.class);
@@ -115,7 +120,9 @@ public class MyPushReciver extends BroadcastReceiver {
                        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(appContext)
                                    .setAutoCancel(true)
                                    .setSmallIcon(R.drawable.ic_launcher)
-                                   .setContentTitle("New move!")
+                               .setLights(Color.parseColor("#B303A2"), 2000, 200)
+                               .setDefaults(Notification.DEFAULT_VIBRATE | Notification.DEFAULT_SOUND)
+                               .setContentTitle("New move!")
                                    .setContentIntent(pendingNotificationIntent)
                                    .setContentText("User " + fromUser + " did a move");
 
@@ -123,6 +130,55 @@ public class MyPushReciver extends BroadcastReceiver {
                        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
                        notificationManager.notify(1, mBuilder.build());
                    }
+               } else if (ACTION_NEW_FRIEND_REQUEST.equals(action)){
+
+
+                   if(MainApplication.isIsOnlineGameVisible()) {
+                       //Skickar iväg en broadcast till min FriendList om den är öppen
+                       context.sendBroadcast(new Intent("com.busck.UPPDATE_FRIENDLIST"));
+
+
+                   } else {
+                       //Och skapar en notification om den är stängd
+                       String fromUser = "";
+
+
+                       if(intent.getExtras() != null) {
+                           try {
+                               JSONObject json = new JSONObject(intent.getExtras().getString("com.parse.Data"));
+                               fromUser = json.getString("fromUser");
+
+                           } catch (JSONException e) {
+                               e.printStackTrace();
+                           }
+
+                       }
+
+                       Intent notificationIntent = new Intent(appContext, FriendListActivity.class);
+                       //notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                       //notificationIntent.putExtra(getString(R.string.FRAGMENT_VALUE), 1);
+                       notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+                       PendingIntent pendingNotificationIntent = PendingIntent.getActivity(appContext, 2, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+
+                       NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(appContext)
+                               .setAutoCancel(true)
+                               .setSmallIcon(R.drawable.ic_launcher)
+                               .setContentTitle("New friend request")
+                               .setLights(Color.parseColor("#B303A2"), 2000, 200)
+                               .setDefaults(Notification.DEFAULT_VIBRATE | Notification.DEFAULT_SOUND)
+                               .setContentIntent(pendingNotificationIntent)
+                               .setContentText("User " + fromUser + " send a friend request!");
+
+
+                       NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+                       notificationManager.notify(1, mBuilder.build());
+                   }
+
+
+
+
                }
 
            }

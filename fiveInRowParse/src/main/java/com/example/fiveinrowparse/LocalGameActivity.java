@@ -6,7 +6,6 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -41,7 +40,7 @@ public class LocalGameActivity extends Activity {
         mPlayerTwoScore = (TextView) findViewById(R.id.player_two_score);
         mSurrenderButton = (Button) findViewById(R.id.surrender_button);
         mPlayAgainButton = (Button) findViewById(R.id.play_again_button);
-        mExitButton = (Button) findViewById(R.id.end_game_button);
+        mExitButton = (Button) findViewById(R.id.return_lobby_button);
         currentPlayerString = (TextView) findViewById(R.id.player_turn_string);
         mGameBoard = (MyBoard) findViewById(R.id.game_board);
         mGameBoard.setOnProgressChangeListener(changeListener);

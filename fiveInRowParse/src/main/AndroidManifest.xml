@@ -9,6 +9,7 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <permission
         android:name="com.example.fiveinrowparse.permission.C2D_MESSAGE"
@@ -25,20 +26,17 @@
         <activity
             android:name="com.example.fiveinrowparse.LocalGameActivity"
             android:label="@string/app_name"
-            android:screenOrientation="landscape"
-            >
+            android:screenOrientation="landscape" >
         </activity>
         <activity
             android:name="com.example.fiveinrowparse.OnlineGameActivity"
             android:label="@string/app_name"
-            android:screenOrientation="landscape"
-           >
+            android:screenOrientation="landscape" >
         </activity>
         <activity
-            android:name="com.example.fiveinrowparse.CreateGameActivity"
+            android:name="com.example.fiveinrowparse.ChooseGametypeActivity"
             android:label="@string/title_activity_create_game"
-            android:screenOrientation="landscape"
-            >
+            android:screenOrientation="landscape" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -53,12 +51,12 @@
         <activity
             android:name="com.example.fiveinrowparse.PlayWithFriendActivity"
             android:label="@string/title_activity_play_with_friend"
-            android:screenOrientation="landscape">
+            android:screenOrientation="landscape" >
         </activity>
         <activity
             android:name="com.example.fiveinrowparse.addFriendActivity"
             android:label="@string/title_activity_add_friend"
-            android:screenOrientation="landscape">
+            android:screenOrientation="landscape" >
         </activity>
 
         <service android:name="com.parse.PushService" />
@@ -94,12 +92,16 @@
         <activity
             android:name="com.example.fiveinrowparse.GameListActivity"
             android:label="@string/title_activity_game_list"
-            android:screenOrientation="landscape">
+            android:screenOrientation="landscape" >
         </activity>
         <activity
             android:name="com.example.fiveinrowparse.FriendListActivity"
             android:label="@string/title_activity_friend_list"
-            android:screenOrientation="landscape">
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
+            android:name="com.example.fiveinrowparse.setupLocalGame"
+            android:label="@string/title_activity_setup_local_game" >
         </activity>
     </application>
 

@@ -48,6 +48,14 @@
 
     </ListView>
 
+        <ProgressBar
+            android:id="@+id/progres_spinner_friendlist"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:visibility="gone">
+        </ProgressBar>
+
     </RelativeLayout>
 
 
@@ -57,6 +65,15 @@
         android:layout_height="fill_parent"
         android:background="@color/pink_background_color"
         android:layout_weight="1">
+
+        <ProgressBar
+            android:id="@+id/progres_spinner_search_friend"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            android:visibility="gone">
+        </ProgressBar>
 
         <LinearLayout
             android:layout_width="fill_parent"

@@ -7,10 +7,14 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.Transformation;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -64,6 +68,8 @@ public class OnlineGameActivity extends Activity {
     Boolean mSomeOneWon = false;
     private Number mLatestMoveIndex = 900; //Utanför array index
     private Boolean mGameOver = false;
+    private Boolean mMenuIsExpanded = false;
+    private String mTheme = "dark";
 
 
     @Override
@@ -81,7 +87,7 @@ public class OnlineGameActivity extends Activity {
         mPlayerTwoScore = (TextView) findViewById(R.id.player_two_score);
         mSurrenderButton = (Button) findViewById(R.id.surrender_button);
         mPlayAgainButton = (Button) findViewById(R.id.play_again_button);
-        mExitButton = (Button) findViewById(R.id.end_game_button);
+        mExitButton = (Button) findViewById(R.id.return_lobby_button);
         currentPlayerString = (TextView) findViewById(R.id.player_turn_string);
         //mGameBoard = (MyBoard) findViewById(R.id.game_board);
         //mGameBoard.setOnProgressChangeListener(changeListener);
@@ -138,6 +144,7 @@ public class OnlineGameActivity extends Activity {
 
 
 
+
     public void uppdateTheGame(){
 
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Games");
@@ -175,6 +182,11 @@ public class OnlineGameActivity extends Activity {
                     mPlayerTwoScore.setText(playerTwoName + ": " + Integer.toString(mPlayerTwoWins));
 
                     mGameBoard.uppdateGame(mGameArray, mPlayerTurn, myPlayerNumber, someOneWon, winningNumber, mLatestMoveIndex);
+
+                    if(!mSomeOneWon){
+                        mPlayAgainButton.setVisibility(View.INVISIBLE);
+
+                    }
 
                 } else {
                     Toast.makeText(OnlineGameActivity.this, "could not contact the server uppdatethegame", Toast.LENGTH_SHORT).show();
@@ -233,7 +245,7 @@ public class OnlineGameActivity extends Activity {
 
                         if (mGameBoard == null) {
                             Log.d("No board", "noBoard");
-                            createTheBoard(mGameArray, false, 0);
+                            createTheBoard(mGameArray, false, 0, mTheme);
                             notifyTheOtherUserAboutTheGame(mOpponentUserId);
                         }
                         // Saved successfully.
@@ -273,10 +285,16 @@ public class OnlineGameActivity extends Activity {
                             Boolean someOneWon = game.getBoolean("someOneWon");
                             int winningNumber = game.getNumber("winnerNumber").intValue();
 
-                            currentPlayerString.setText(game.getString("playersTurn") + " " + "turn!");
+
+                            if(mPlayerTurn.equals(ParseUser.getCurrentUser().getUsername())){
+                                currentPlayerString.setText("Your Turn!");
+                            }else{
+
+                                currentPlayerString.setText(mPlayerTurn + " " + "turn!");
+                            }
                             mPlayerOneScore.setText(playerOneName + ": " + Integer.toString(mPlayerOneWins));
                             mPlayerTwoScore.setText(playerTwoName + ": " + Integer.toString(mPlayerTwoWins));
-                            createTheBoard(mGameArray, someOneWon, winningNumber);
+                            createTheBoard(mGameArray, someOneWon, winningNumber, mTheme);
                             Log.d("No board", "noBoard");
                         }
 
@@ -290,7 +308,17 @@ public class OnlineGameActivity extends Activity {
         }
     }
 
-    private void createTheBoard(int[] gameArray, Boolean someOneWon, int winningNumber) {
+    public void ChangeThemeButton(View view){
+        String theme = (String) view.getTag();
+
+        RelativeLayout container = (RelativeLayout) findViewById(R.id.game_online_board_view);
+        container.removeAllViews();
+
+        createTheBoard(mGameArray, false, 0, theme);
+
+    }
+
+    private void createTheBoard(int[] gameArray, Boolean someOneWon, int winningNumber, String theme) {
         int myPlayerNumber;
 
         if(playerOneName.equals(ParseUser.getCurrentUser().getUsername())){
@@ -299,7 +327,8 @@ public class OnlineGameActivity extends Activity {
             myPlayerNumber = 2;
         }
         RelativeLayout container = (RelativeLayout) findViewById(R.id.game_online_board_view);
-        mGameBoard = new MyOnlineBoard(this, gameArray, mPlayerTurn, myPlayerNumber, someOneWon, winningNumber, mLatestMoveIndex);
+        mGameBoard = new MyOnlineBoard(this, gameArray, mPlayerTurn, myPlayerNumber, someOneWon, winningNumber, mLatestMoveIndex, theme);
+
         container.addView(mGameBoard);
         mGameBoard.setOnProgressChangeListener(changeListener);
         mGameBoard.uppdateGame(gameArray, mPlayerTurn, myPlayerNumber, someOneWon, winningNumber, mLatestMoveIndex);
@@ -414,6 +443,7 @@ public class OnlineGameActivity extends Activity {
 
     private void uppdateGameOnParseWinner(final int[] gameArray, final int winner) {
         if(!mGameOver) {
+
             ParseQuery<ParseObject> query = ParseQuery.getQuery("Games");
             query.getInBackground(mCurrentGameId, new GetCallback<ParseObject>() {
                 public void done(ParseObject game, ParseException e) {
@@ -548,4 +578,28 @@ public class OnlineGameActivity extends Activity {
     public void exitGame(View view) {
         finish();
     }
+
+    //Omvandlar dp till pixlar
+    public int getPx(float dp){
+        DisplayMetrics metrics = this.getResources().getDisplayMetrics();
+        int pixels = (int) (metrics.density * dp + 0.5f);
+        return pixels;
+    }
+
+    //startar animationen för att visa den utfällbara resultattavlan
+    public void openMenu(View view) {
+
+        RelativeLayout totalBar = (RelativeLayout) findViewById(R.id.menu_layout);
+
+
+        if(!mMenuIsExpanded) {
+            totalBar.setVisibility(View.VISIBLE);
+            mMenuIsExpanded = true;
+        }else{
+            totalBar.setVisibility(View.INVISIBLE);
+            mMenuIsExpanded = false;
+
+        }
+    }
+
 }

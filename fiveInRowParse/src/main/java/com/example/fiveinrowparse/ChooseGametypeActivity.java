@@ -1,46 +1,29 @@
 package com.example.fiveinrowparse;
 
 import android.app.Activity;
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import com.parse.ParseAnalytics;
-import com.parse.ParseUser;
 
 
-public class CreateGameActivity extends Activity {
-
-
-    private ChooseGameTypeFragment mChooseGameTypeFragment;
-    private StartLocalGameFragment mStartLocalGameFragment;
-    private StartOnlineGameFragment mStartOnlineGameFragment;
+public class ChooseGametypeActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        setContentView(R.layout.activity_create_game);
+        setContentView(R.layout.activity_choose_gametype_activity);
         ParseAnalytics.trackAppOpened(getIntent());
 
 
-        mChooseGameTypeFragment = new ChooseGameTypeFragment();
-        mStartLocalGameFragment = new StartLocalGameFragment();
-        mStartOnlineGameFragment = new StartOnlineGameFragment();
 
-        FragmentManager fragmentManager = getFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.container, mChooseGameTypeFragment).commit();
 
 
     }
@@ -51,107 +34,26 @@ public class CreateGameActivity extends Activity {
 
     }
 
-    public void startTheGame(View view) {
-        EditText playerOne = (EditText) findViewById(R.id.player_one_textfield);
-        EditText playerTwo = (EditText) findViewById(R.id.player_two_textfield);
 
-        if(playerOne.getText() != null && playerTwo.getText() != null) {
-            String playerOneName = playerOne.getText().toString();
-            String playerTwoName = playerOne.getText().toString();
 
-            if(!playerOneName.equals("") && !playerTwoName.equals("")) {
-                Intent intent = new Intent(this, LocalGameActivity.class);
-                intent.putExtra("playerOne", playerOne.getText().toString());
-                intent.putExtra("playerTwo", playerTwo.getText().toString());
-                startActivity(intent);
-            }else{
-                Toast.makeText(this, "You must choose names for all players!", Toast.LENGTH_SHORT).show();
-            }
-
-        } else{
-            Toast.makeText(this, "You must choose names for all players!", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    public void openLocalGameOptionScreen(View view) {
-        FragmentManager fragmentManager = getFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.container, mStartLocalGameFragment).commit();
-
-    }
-
-    public void goFromLocalToChooseScreen(View view) {
-        FragmentManager fragmentManager = getFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.container, mChooseGameTypeFragment).commit();
-
-    }
-
-    public void goFromOnlineToChooseScreen(View view) {
-        FragmentManager fragmentManager = getFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.container, mChooseGameTypeFragment).commit();
-    }
 
     public void openOnlineGameOptionScreen(View view) {
-        /*FragmentManager fragmentManager = getFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.container, mStartOnlineGameFragment).commit();
-        */
-
-
             Intent intent = new Intent(this, GameListActivity.class);
             startActivity(intent);
 
 
-
-
-
-
     }
 
-
-
-    public void startRandomOnlineGame(View view) {
-
-    }
-
-
-
-    public void logoutUser(View view) {
-        ParseUser currentUser = ParseUser.getCurrentUser();
-        currentUser.logOut();
-        Toast.makeText(this, "Logged out", Toast.LENGTH_LONG).show();
-    }
-
-    public void startGameWithFriendButton(View view) {
-        Intent intent = new Intent(this, PlayWithFriendActivity.class);
+    public void openLocalGameOptionScreen(View view){
+        Intent intent = new Intent(this, setupLocalGame.class);
         startActivity(intent);
+
     }
 
-    public static class ChooseGameTypeFragment extends Fragment {
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-            return inflater.inflate(R.layout.choose_gametype_fragment, container, false);
-        }
-    }
 
-    public static class StartLocalGameFragment extends Fragment {
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-            return inflater.inflate(R.layout.start_local_game_fragment, container, false);
-        }
-    }
 
-    public static class StartOnlineGameFragment extends Fragment {
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-            return inflater.inflate(R.layout.start_online_game_fragment, container, false);
-        }
-    }
+
+
 }
 
 

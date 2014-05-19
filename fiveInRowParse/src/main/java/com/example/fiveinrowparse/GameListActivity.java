@@ -26,6 +26,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.parse.DeleteCallback;
 import com.parse.FindCallback;
 import com.parse.GetCallback;
 import com.parse.LogInCallback;
@@ -39,6 +40,7 @@ import com.parse.SignUpCallback;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 
@@ -54,6 +56,7 @@ public class GameListActivity extends Activity {
     private List<ParseObject> mAllGamesList;
     private GameListAdapter mGameAdapter;
     private ListView mGameListView;
+    ProgressBar mProgressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +64,8 @@ public class GameListActivity extends Activity {
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_game_list);
+
+        mProgressBar = (ProgressBar) findViewById(R.id.progres_spinner_gamelist);
 
 
     }
@@ -274,8 +279,11 @@ public class GameListActivity extends Activity {
         installation.saveInBackground();
 
         ParseUser.logOut();
+        if(mAllGamesList != null){
+
         mAllGamesList.clear();
         mGameAdapter.notifyDataSetChanged();
+        }
 
         handleLoginWindowVisability();
     }
@@ -283,8 +291,7 @@ public class GameListActivity extends Activity {
     //Hämtar alla spel där man är spelare 1 eller 2
 
     private void getAllGames() {
-        final ProgressBar progress = (ProgressBar) findViewById(R.id.progres_spinner_gamelist);
-        progress.setVisibility(View.VISIBLE);
+        mProgressBar.setVisibility(View.VISIBLE);
         ParseQuery<ParseObject> firstPlayerQuery = ParseQuery.getQuery("Games");
         firstPlayerQuery.whereEqualTo("playerOneName", ParseUser.getCurrentUser().getUsername());
 
@@ -301,10 +308,10 @@ public class GameListActivity extends Activity {
         mainQuery.findInBackground(new FindCallback<ParseObject>() {
             public void done(List<ParseObject> gameList, ParseException e) {
 
-                progress.setVisibility(View.GONE);
+                mProgressBar.setVisibility(View.GONE);
 
                 if (e == null) {
-                    mAllGamesList = gameList;
+                    mAllGamesList = sortOutDeletedGames(gameList);
                     mGameListView = (ListView) findViewById(R.id.game_list_view);
                     mGameAdapter = new GameListAdapter(GameListActivity.this, mAllGamesList);
                     mGameListView.setAdapter(mGameAdapter);
@@ -316,9 +323,23 @@ public class GameListActivity extends Activity {
                             final ParseObject gameToOpen = (ParseObject) mGameAdapter.getItem(position); //Hämtar spelobjectet på den possitionen
 
 
+                            //Om motståndaren raderat spelet
+                            if(gameToOpen.getString("deletedBy") != null){
+                                final AlertDialog alertDialog = new AlertDialog.Builder(GameListActivity.this).create();
+                                alertDialog.setMessage("Could not open the game because your opponent have deleted it" );
+                                alertDialog.setButton(DialogInterface.BUTTON_NEUTRAL, "Ok", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        alertDialog.dismiss();
+                                    }
+                                });
+                                //alertDialog.setIcon(R.drawable.icon);
+                                alertDialog.show();
+                            }
+
                             //Om man är spelare 2 och inte har accepterat spelet
 
-                            if(!gameToOpen.getBoolean("playerTwoAccepted") && gameToOpen.getString("playerTwoName").equals(ParseUser.getCurrentUser().getUsername())){
+                            else if(!gameToOpen.getBoolean("playerTwoAccepted") && gameToOpen.getString("playerTwoName").equals(ParseUser.getCurrentUser().getUsername())){
 
                                 AlertDialog.Builder builder1 = new AlertDialog.Builder(GameListActivity.this);
                                 builder1.setMessage("Do you accept this game invite?");
@@ -337,12 +358,12 @@ public class GameListActivity extends Activity {
                                                             game.saveInBackground(new SaveCallback() {
                                                                 public void done(ParseException e) {
                                                                     if (e == null) {
-                                                                        dialog.cancel(); //Stänger dialogen när det är uppdaterat på parse
+                                                                        dialog.dismiss(); //Stänger dialogen när det är uppdaterat på parse
                                                                         openGame(gameToOpen);
 
                                                                     } else {
                                                                         // The save failed.
-                                                                        dialog.cancel(); //Stänger dialogen även om det misslyckades
+                                                                        dialog.dismiss(); //Stänger dialogen även om det misslyckades
                                                                         Log.d("tag", "User update error: " + e);
                                                                     }
                                                                 }
@@ -358,7 +379,7 @@ public class GameListActivity extends Activity {
                                         //Raderar spelat om man klickar nej
                                         new DialogInterface.OnClickListener() {
                                             public void onClick(final DialogInterface dialog, int id) {
-                                                gameToOpen.deleteInBackground();
+                                                ShowDeleteGameDialog(gameToOpen);
                                                 dialog.dismiss();
                                                 getAllGames();
                                             }
@@ -373,6 +394,20 @@ public class GameListActivity extends Activity {
                             }
                         }
 
+
+
+                    });
+
+                    //Vid long click
+                    mGameListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+                        @Override
+                        public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                            final ParseObject gameToDelete = (ParseObject) mGameAdapter.getItem(position); //Hämtar spelobjectet på den possitionen
+
+
+                            ShowDeleteGameDialog(gameToDelete);
+                            return true;
+                        }
                     });
 
                     Log.d("all games list", Integer.toString(mAllGamesList.size()));
@@ -382,6 +417,76 @@ public class GameListActivity extends Activity {
             }
         });
     }
+
+    private void ShowDeleteGameDialog(final ParseObject gameTodelete){
+
+        final AlertDialog alertDialog = new AlertDialog.Builder(this).create();
+        alertDialog.setMessage("Do you want to delete this game?" );
+        alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, "Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if (gameTodelete.getString("deletedBy") == null ){
+                    gameTodelete.put("deletedBy", ParseUser.getCurrentUser().getUsername());
+                    mProgressBar.setVisibility(View.VISIBLE);
+                    gameTodelete.saveInBackground( new SaveCallback() {
+                        @Override
+                        public void done(ParseException e) {
+
+                            getAllGames();
+                        }
+                    });
+
+                }else if(gameTodelete.getString("deletedBy") != null){
+                    mProgressBar.setVisibility(View.VISIBLE);
+                    gameTodelete.deleteInBackground(new DeleteCallback() {
+                        @Override
+                        public void done(ParseException e) {
+                            getAllGames();
+                        }
+                    });
+
+                }
+                    alertDialog.dismiss();
+            }
+        });
+
+        alertDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                alertDialog.dismiss();
+            }
+        });
+        //alertDialog.setIcon(R.drawable.icon);
+        alertDialog.show();
+
+    }
+
+
+
+    public List<ParseObject> sortOutDeletedGames(List<ParseObject> games) {
+
+
+        List<ParseObject> ListOfGamesToReturn = games;
+
+        Iterator<ParseObject> iter = ListOfGamesToReturn.iterator();
+        while (iter.hasNext()) {
+
+            ParseObject next = iter.next();
+            if(next.getString("deletedBy") != null) {
+                if (next.getString("deletedBy").equals(ParseUser.getCurrentUser().getUsername())) {
+                    iter.remove();
+                }
+            }
+        }
+
+
+
+        return ListOfGamesToReturn;
+    }
+
+
+
+
 
     //Öppnar spelet vid klick på en rad
 
@@ -484,6 +589,7 @@ public class GameListActivity extends Activity {
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
+            String opponentName = "";
             if (convertView == null) {
                 convertView = View.inflate(mActivity, R.layout.game_list_item, null);
             }
@@ -491,10 +597,14 @@ public class GameListActivity extends Activity {
             ParseObject game = mGames.get(position);
             if (game.getString("playerOneName").equals(ParseUser.getCurrentUser().getUsername())) {
 
-                ((TextView) convertView.findViewById(R.id.opponent_name_label)).setText(game.getString("playerTwoName"));
+                opponentName = game.getString("playerTwoName");
+                ((TextView) convertView.findViewById(R.id.opponent_name_label)).setText(opponentName);
+
 
             } else if (game.getString("playerTwoName").equals(ParseUser.getCurrentUser().getUsername())) {
-                ((TextView) convertView.findViewById(R.id.opponent_name_label)).setText(game.getString("playerOneName"));
+
+                opponentName = game.getString("playerOneName");
+                ((TextView) convertView.findViewById(R.id.opponent_name_label)).setText(opponentName);
             }
 
 
@@ -517,6 +627,13 @@ public class GameListActivity extends Activity {
 
             }else{
                 ((TextView) convertView.findViewById(R.id.player_turn_label)).setText(game.getString("playersTurn") + " Turn!");
+            }
+
+            if (game.getString("deletedBy") != null) {
+                if (game.getString("deletedBy").equals(opponentName)) {
+                    ((TextView) convertView.findViewById(R.id.player_turn_label)).setText("Deleted by opponent");
+                }
+
             }
 
 
