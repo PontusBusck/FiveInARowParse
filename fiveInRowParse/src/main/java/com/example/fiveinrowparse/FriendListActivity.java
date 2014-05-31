@@ -513,7 +513,7 @@ public class FriendListActivity extends Activity {
                                     @Override
                                     public void done(ParseException e) {
                                         uppdateFriendRequests();
-                                        //uppdateFriendListView();
+                                        notifyTheOtherUserAboutAcceptedInvite(requestToAccept.getString("fromId"));
                                     }
                                 });
 
@@ -545,9 +545,34 @@ public class FriendListActivity extends Activity {
         acceptGameAlert.show();
     }
 
+    private void notifyTheOtherUserAboutAcceptedInvite(String recivingUserId) {
+        ParseQuery userQuery = ParseInstallation.getQuery();
+        userQuery.whereEqualTo("userId", recivingUserId);
+
+        JSONObject data = new JSONObject();
+        try {
+            data.put("action", "com.example.ACCEPTED_FRIEND_REQUEST");
+            data.put("fromUser", ParseUser.getCurrentUser().getUsername());
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        ParsePush parsePush = new ParsePush();
+        parsePush.setQuery(userQuery);
+        parsePush.setMessage("Accepted friend request");
+        parsePush.setData(data);
+        parsePush.sendInBackground();
+
+    }
+
     //Klick on back button
     public void back(View view) {
         finish();
+    }
+
+    public void refreshButtonClicked(View view) {
+        uppdateFriendRequests();
     }
 
 

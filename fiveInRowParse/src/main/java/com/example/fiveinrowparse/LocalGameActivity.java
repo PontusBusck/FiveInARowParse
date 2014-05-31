@@ -1,6 +1,7 @@
 package com.example.fiveinrowparse;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
@@ -8,6 +9,8 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import com.parse.ParseUser;
 
 
 public class LocalGameActivity extends Activity {
@@ -26,6 +29,12 @@ public class LocalGameActivity extends Activity {
     private int mPlayerTwoWins = 0;
     private TextView mPlayerOneScore;
     private TextView mPlayerTwoScore;
+    private static final String SETTINGS_PREFS = "com.busck.fiveInRow.Settings";
+    private static final String THEME_PREFS = "com.busck.fiveInRow.theme_prefs";
+    private String mTheme;
+    private Boolean mMenuIsExpanded = false;
+    private int[] mGameArray = new int[800];
+
 
 
     @Override
@@ -42,8 +51,6 @@ public class LocalGameActivity extends Activity {
         mPlayAgainButton = (Button) findViewById(R.id.play_again_button);
         mExitButton = (Button) findViewById(R.id.return_lobby_button);
         currentPlayerString = (TextView) findViewById(R.id.player_turn_string);
-        mGameBoard = (MyBoard) findViewById(R.id.game_board);
-        mGameBoard.setOnProgressChangeListener(changeListener);
         playerOneName = getIntent().getStringExtra("playerOne");
         playerTwoName = getIntent().getStringExtra("playerTwo");
         currentPlayerString.setText(playerOneName + "turn!");
@@ -51,6 +58,10 @@ public class LocalGameActivity extends Activity {
         mPlayerTwoScore.setText(playerTwoName + ": " + Integer.toString(mPlayerTwoWins));
 
 
+        SharedPreferences settings = getSharedPreferences(SETTINGS_PREFS, 0);
+        mTheme = settings.getString(THEME_PREFS, "dark");
+
+        createTheBoard(mTheme);
 
     }
 
@@ -58,6 +69,18 @@ public class LocalGameActivity extends Activity {
     @Override
     public void onBackPressed() {
         //super.onBackPressed();
+    }
+
+    private void createTheBoard(String theme) {
+
+        RelativeLayout container = (RelativeLayout) findViewById(R.id.game_board_view);
+        mGameBoard = new MyBoard(this, mGameArray, theme);
+
+
+        container.addView(mGameBoard);
+        mGameBoard.setOnProgressChangeListener(changeListener);
+
+
     }
 
     public void updateCurrentPlayerState(int playerCode){
@@ -106,15 +129,50 @@ public class LocalGameActivity extends Activity {
         mExitButton.setVisibility(View.INVISIBLE);
         mPlayAgainButton.setVisibility(View.INVISIBLE);
         mSurrenderButton.setVisibility(View.VISIBLE);
+        Button menuButton = (Button) findViewById(R.id.menu_button);
+        menuButton.setVisibility(View.VISIBLE);
 
     }
 
     public void surrenderGame(View view) {
         someOneWon();
         mGameBoard.surrenderTheGame();
+
+        Button menuButton = (Button) findViewById(R.id.menu_button);
+        menuButton.setVisibility(View.GONE);
     }
 
     public void exitGame(View view) {
         finish();
+    }
+
+    public void ChangeThemeButton(View view) {
+
+        mTheme = (String) view.getTag();
+
+        SharedPreferences settings = getSharedPreferences(SETTINGS_PREFS, 0);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString(THEME_PREFS, mTheme);
+        editor.commit();
+
+        RelativeLayout container = (RelativeLayout) findViewById(R.id.game_board_view);
+        container.removeAllViews();
+
+        createTheBoard(mTheme);
+    }
+
+    public void openMenu(View view) {
+
+        RelativeLayout totalBar = (RelativeLayout) findViewById(R.id.menu_layout);
+
+
+        if(!mMenuIsExpanded) {
+            totalBar.setVisibility(View.VISIBLE);
+            mMenuIsExpanded = true;
+        }else{
+            totalBar.setVisibility(View.INVISIBLE);
+            mMenuIsExpanded = false;
+
+        }
     }
 }

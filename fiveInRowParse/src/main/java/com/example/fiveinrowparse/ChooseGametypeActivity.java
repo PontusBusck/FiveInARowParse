@@ -1,6 +1,8 @@
 package com.example.fiveinrowparse;
 
 import android.app.Activity;
+import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -21,6 +23,7 @@ public class ChooseGametypeActivity extends Activity {
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_choose_gametype_activity);
         ParseAnalytics.trackAppOpened(getIntent());
+
 
 
 

@@ -96,7 +96,10 @@ public class MyOnlineBoard extends View {
     //Online Variabler
     private String mOpponentName;
     private int mMyPlayerNumber;
-
+    private int mLeftMargin;
+    private int mBoardPiceHeight;
+    private int mBoardPiceWidth;
+    private int mTopMargin;
 
 
     public MyOnlineBoard(Context context, int[] gameArray, String playerTurn, int myPlayerNumer, boolean someOneWon, int winner, Number lastMoveIndex, String theme) {
@@ -203,6 +206,11 @@ public class MyOnlineBoard extends View {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         parentWidth = MeasureSpec.getSize(widthMeasureSpec);
         parentHeight = MeasureSpec.getSize(heightMeasureSpec);
+
+
+        Log.d("parentWidth", Integer.toString(parentWidth));
+        Log.d("parentHeight", Integer.toString(parentHeight));
+
         this.setMeasuredDimension(parentWidth, parentHeight);
         //super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         init(null, 0);
@@ -223,15 +231,57 @@ public class MyOnlineBoard extends View {
         }
 
         //boardBackground = BitmapFactory.decodeResource(getResources(), R.drawable.gameboardbackground);
-        emtySquareScaled = Bitmap.createScaledBitmap(emptySquare, parentWidth / mBoardColumns, parentHeight / mBoardRows, false);
-        crossSquareScaled = Bitmap.createScaledBitmap(crossSquare, parentWidth / mBoardColumns, parentHeight / mBoardRows, false);
-        circleSquareScaled = Bitmap.createScaledBitmap(circleSquare, parentWidth / mBoardColumns, parentHeight / mBoardRows, false);
+        //emtySquareScaled = Bitmap.createScaledBitmap(emptySquare, parentWidth / mBoardColumns, parentHeight / mBoardRows, false);
+        //crossSquareScaled = Bitmap.createScaledBitmap(crossSquare, parentWidth / mBoardColumns, parentHeight / mBoardRows, false);
+        //circleSquareScaled = Bitmap.createScaledBitmap(circleSquare, parentWidth / mBoardColumns, parentHeight / mBoardRows, false);
+
+        //Räknar ut storlekarna
+        calculateGamepicesWidthAndHeight();
+
+        emtySquareScaled = Bitmap.createScaledBitmap(emptySquare, mBoardPiceWidth, mBoardPiceHeight, false);
+        crossSquareScaled = Bitmap.createScaledBitmap(crossSquare, mBoardPiceWidth, mBoardPiceHeight, false);
+        circleSquareScaled = Bitmap.createScaledBitmap(circleSquare, mBoardPiceWidth, mBoardPiceHeight, false);
+
+
+        //mLeftMargin = (parentWidth - ((parentHeight/mBoardRows)*mBoardColumns))/2;
+
+        Log.d("LeftMargin", Integer.toString(mLeftMargin));
+
+
+
+
 
         mFirtMoveMarker = new Paint();
         mFirtMoveMarker.setColor(Color.parseColor("#c60b39"));
         mFirtMoveMarker.setAlpha(128);
 
+
+
+
         //boardBackground = Bitmap.createScaledBitmap(boardBackground, parentWidth, parentHeight, false);
+    }
+
+    //Räknar ut storlekar och marginaler
+    public void calculateGamepicesWidthAndHeight(){
+
+        if(parentWidth/2 >= parentHeight){
+        mBoardPiceHeight = parentHeight/mBoardRows;
+        mBoardPiceWidth = parentHeight/mBoardRows;
+        mTopMargin = (parentHeight - (mBoardPiceHeight*mBoardRows))/2;
+        mLeftMargin = (parentWidth - (mBoardPiceWidth*mBoardColumns))/2;
+
+
+
+
+        } else if (parentHeight*2 >= parentWidth){
+            mBoardPiceHeight = parentWidth/mBoardColumns;
+            mBoardPiceWidth = parentWidth/mBoardColumns;
+            mTopMargin = (parentHeight - (mBoardPiceHeight*mBoardRows))/2;
+            mLeftMargin = (parentWidth - (mBoardPiceWidth*mBoardColumns))/2;
+
+
+        }
+
     }
 
     public void uppdateGame(int[] gameArray, String playerTurn,  int myPlayerNumer, boolean someOneWon, int winner, Number lastMoveIndex){
@@ -293,6 +343,8 @@ public class MyOnlineBoard extends View {
             translateY = (1 - scaleFactor) * parentHeight;
         }
 
+
+
         canvas.translate(translateX / scaleFactor, translateY / scaleFactor);
         translateSinceStartX = startTranslateX + translateX;
         translateSinceStartY = startTranslateY + translateY;
@@ -306,15 +358,15 @@ public class MyOnlineBoard extends View {
         int j = 0;
         int p = 0;
 
-        for (j = 0; j < 20; j++) {
+        for (j = 0; j < mBoardRows; j++) {
             int i = 0;
             for (i = 0; i < mBoardColumns; i++) {
                 if (mGameArray[p] == PLAYER_ONE) {
-                     canvas.drawBitmap(crossSquareScaled, i * crossSquareScaled.getWidth(), j * crossSquareScaled.getHeight(), null);
+                     canvas.drawBitmap(crossSquareScaled, i * crossSquareScaled.getWidth() + mLeftMargin, j * crossSquareScaled.getHeight() +mTopMargin, null);
 
                     if(p == mLatestMoveIndex.intValue()){
 
-                        canvas.drawRect(i * circleSquareScaled.getWidth(), j * circleSquareScaled.getHeight(), i * circleSquareScaled.getWidth()+circleSquareScaled.getWidth(),  j * circleSquareScaled.getHeight()+ circleSquareScaled.getHeight(), mFirtMoveMarker);
+                        canvas.drawRect(i * circleSquareScaled.getWidth() + mLeftMargin, j * circleSquareScaled.getHeight()+mTopMargin, i * circleSquareScaled.getWidth() + circleSquareScaled.getWidth() + mLeftMargin, j * circleSquareScaled.getHeight() + circleSquareScaled.getHeight() +mTopMargin, mFirtMoveMarker);
 
 
                     }
@@ -322,18 +374,18 @@ public class MyOnlineBoard extends View {
                     p++;
 
                 } else if (mGameArray[p] == PLAYER_TWO) {
-                    canvas.drawBitmap(circleSquareScaled, i * circleSquareScaled.getWidth(), j * circleSquareScaled.getHeight(), null);
+                    canvas.drawBitmap(circleSquareScaled, i * circleSquareScaled.getWidth() + mLeftMargin, j * circleSquareScaled.getHeight() + mTopMargin, null);
 
                     if(p == mLatestMoveIndex.intValue()){
 
-                        canvas.drawRect(i * circleSquareScaled.getWidth(), j * circleSquareScaled.getHeight(), i * circleSquareScaled.getWidth()+circleSquareScaled.getWidth(),  j * circleSquareScaled.getHeight()+ circleSquareScaled.getHeight(), mFirtMoveMarker);
+                        canvas.drawRect(i * circleSquareScaled.getWidth() + mLeftMargin, j * circleSquareScaled.getHeight() + mTopMargin, i * circleSquareScaled.getWidth() + circleSquareScaled.getWidth() + mLeftMargin, j * circleSquareScaled.getHeight() + circleSquareScaled.getHeight() + mTopMargin, mFirtMoveMarker);
                     }
 
                     p++;
 
 
                 } else {
-                    canvas.drawBitmap(emtySquareScaled, i * emtySquareScaled.getWidth(), j * emtySquareScaled.getHeight(), null);
+                    canvas.drawBitmap(emtySquareScaled, i * emtySquareScaled.getWidth() + mLeftMargin, j * emtySquareScaled.getHeight() + mTopMargin, null);
                     p++;
 
                 }
@@ -437,8 +489,8 @@ public class MyOnlineBoard extends View {
 
             Boolean playerWon = false;
             int winningPlayer = 0;
-            float valueX = event.getRawX() + (-translateSinceStartX);
-            float valueY = event.getRawY() + (-translateSinceStartY);
+            float valueX = event.getRawX() + (-translateSinceStartX-(mLeftMargin*2));
+            float valueY = event.getRawY() + (-translateSinceStartY-(mTopMargin*2));
 
             float x = (valueX / (emtySquareScaled.getWidth() * scaleFactor));
             float y = (valueY / (emtySquareScaled.getHeight() * scaleFactor));

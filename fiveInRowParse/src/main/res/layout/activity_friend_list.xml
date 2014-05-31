@@ -90,6 +90,7 @@
             android:text="Search for a friend"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
             android:textColor="@color/gray_background_color"
             android:textSize="25sp"
             android:layout_centerHorizontal="true"/>
@@ -116,6 +117,13 @@
 
         </LinearLayout>
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:weightSum="2"
+            android:orientation="horizontal">
+
         <Button
             android:id="@+id/back_button"
             android:layout_width="fill_parent"
@@ -124,11 +132,25 @@
             android:textColor="#FFFFFF"
             android:onClick="back"
             android:background="@drawable/game_list_button"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentLeft="true"
             android:layout_marginBottom="20dp"
             android:layout_marginLeft="20dp"
-            android:layout_marginRight="20dp"/>
+            android:layout_marginRight="10dp"
+            android:layout_weight="1"/>
+
+            <Button
+                android:id="@+id/refresh_button"
+                android:layout_width="fill_parent"
+                android:layout_height="@dimen/button_height"
+                android:text="Refresh"
+                android:textColor="#FFFFFF"
+                android:onClick="refreshButtonClicked"
+                android:background="@drawable/game_list_button"
+                android:layout_marginBottom="20dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="20dp"
+                android:layout_weight="1"/>
+
+        </LinearLayout>
 
 
     </RelativeLayout>

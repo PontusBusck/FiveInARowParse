@@ -46,7 +46,7 @@ public class MyBoard extends View {
     private float previousTranslateX = 0f;
     private float previousTranslateY = 0f;
     private boolean dragged = true;
-    private int[] mGameArray = new int[800];
+    private int[] mGameArray;
     private int PLAYER_ONE = 1;
     private int PLAYER_TWO = 2;
     private int PLAYER_ONE_WON = 3;
@@ -66,24 +66,33 @@ public class MyBoard extends View {
     private int mBoardColumns = 40;
     private int mBoardRows = 20;
     private Bitmap boardBackground;
+    private String mTheme;
+    private int mLeftMargin;
+    private int mBoardPiceHeight;
+    private int mBoardPiceWidth;
+    private int mTopMargin;
 
 
-    public MyBoard(Context context) {
+    public MyBoard(Context context, int[] gameArray, String theme) {
         super(context);
 
         detector = new ScaleGestureDetector(getContext(), new ScaleListener());
+        mTheme = theme;
+        mGameArray = gameArray;
 
     }
 
-    public MyBoard(Context context, AttributeSet attrs) {
+    public MyBoard(Context context, int[] gameArray, String theme, AttributeSet attrs) {
         super(context, attrs);
-
+        mTheme = theme;
+        mGameArray = gameArray;
         detector = new ScaleGestureDetector(getContext(), new ScaleListener());
     }
 
-    public MyBoard(Context context, AttributeSet attrs, int defStyle) {
+    public MyBoard(Context context, int[] gameArray, String theme, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-
+        mTheme = theme;
+        mGameArray = gameArray;
         detector = new ScaleGestureDetector(getContext(), new ScaleListener());
     }
 
@@ -100,14 +109,46 @@ public class MyBoard extends View {
         paint = new Paint();
         paint.setColor(Color.BLUE);
         rect = new Rect(0, 0, parentWidth, parentHeight);
-        emptySquare = BitmapFactory.decodeResource(getResources(), R.drawable.emtysquare);
-        crossSquare = BitmapFactory.decodeResource(getResources(), R.drawable.cross);
-        circleSquare = BitmapFactory.decodeResource(getResources(), R.drawable.circle);
+        if(mTheme.equals("dark")){
+            emptySquare = BitmapFactory.decodeResource(getResources(), R.drawable.emtysquare);
+            crossSquare = BitmapFactory.decodeResource(getResources(), R.drawable.cross);
+            circleSquare = BitmapFactory.decodeResource(getResources(), R.drawable.circle);
+        } else{
+            emptySquare = BitmapFactory.decodeResource(getResources(), R.drawable.light_emtysquare);
+            crossSquare = BitmapFactory.decodeResource(getResources(), R.drawable.light_cross);
+            circleSquare = BitmapFactory.decodeResource(getResources(), R.drawable.light_circle);
+        }
+
+        calculateGamepicesWidthAndHeight();
+
         //boardBackground = BitmapFactory.decodeResource(getResources(), R.drawable.gameboardbackground);
-        emtySquareScaled = Bitmap.createScaledBitmap(emptySquare, parentWidth / mBoardColumns, parentHeight / mBoardRows, false);
-        crossSquareScaled = Bitmap.createScaledBitmap(crossSquare, parentWidth / mBoardColumns, parentHeight / mBoardRows, false);
-        circleSquareScaled = Bitmap.createScaledBitmap(circleSquare, parentWidth / mBoardColumns, parentHeight / mBoardRows, false);
+        emtySquareScaled = Bitmap.createScaledBitmap(emptySquare, mBoardPiceWidth, mBoardPiceHeight, false);
+        crossSquareScaled = Bitmap.createScaledBitmap(crossSquare, mBoardPiceWidth, mBoardPiceHeight, false);
+        circleSquareScaled = Bitmap.createScaledBitmap(circleSquare, mBoardPiceWidth, mBoardPiceHeight, false);
         //boardBackground = Bitmap.createScaledBitmap(boardBackground, parentWidth, parentHeight, false);
+    }
+
+    //Räknar ut storlekar och marginaler
+    public void calculateGamepicesWidthAndHeight(){
+
+        if(parentWidth/2 >= parentHeight){
+            mBoardPiceHeight = parentHeight/mBoardRows;
+            mBoardPiceWidth = parentHeight/mBoardRows;
+            mTopMargin = (parentHeight - (mBoardPiceHeight*mBoardRows))/2;
+            mLeftMargin = (parentWidth - (mBoardPiceWidth*mBoardColumns))/2;
+
+            Log.d("LeftMargin inside 1" , Integer.toString(mLeftMargin));
+
+
+        } else if (parentHeight*2 >= parentWidth){
+            mBoardPiceHeight = parentWidth/mBoardColumns;
+            mBoardPiceWidth = parentWidth/mBoardColumns;
+            mTopMargin = (parentHeight - (mBoardPiceHeight*mBoardRows))/2;
+            mLeftMargin = (parentWidth - (mBoardPiceWidth*mBoardColumns))/2;
+
+            Log.d("LeftMargin inside 2" , Integer.toString(mLeftMargin));
+        }
+
     }
 
 
@@ -151,19 +192,24 @@ public class MyBoard extends View {
         int j = 0;
         int p = 0;
 
-        for (j = 0; j < 20; j++) {
+        for (j = 0; j < mBoardRows; j++) {
             int i = 0;
             for (i = 0; i < mBoardColumns; i++) {
                 if (mGameArray[p] == PLAYER_ONE) {
-                    canvas.drawBitmap(crossSquareScaled, i * crossSquareScaled.getWidth(), j * crossSquareScaled.getHeight(), null);
+                    canvas.drawBitmap(crossSquareScaled, i * crossSquareScaled.getWidth() + mLeftMargin, j * crossSquareScaled.getHeight() +mTopMargin, null);
+
+
                     p++;
+
                 } else if (mGameArray[p] == PLAYER_TWO) {
-                    canvas.drawBitmap(circleSquareScaled, i * circleSquareScaled.getWidth(), j * circleSquareScaled.getHeight(), null);
+                    canvas.drawBitmap(circleSquareScaled, i * circleSquareScaled.getWidth() + mLeftMargin, j * circleSquareScaled.getHeight() + mTopMargin, null);
+
+
                     p++;
 
 
                 } else {
-                    canvas.drawBitmap(emtySquareScaled, i * emtySquareScaled.getWidth(), j * emtySquareScaled.getHeight(), null);
+                    canvas.drawBitmap(emtySquareScaled, i * emtySquareScaled.getWidth() + mLeftMargin, j * emtySquareScaled.getHeight() + mTopMargin, null);
                     p++;
 
                 }
@@ -252,8 +298,8 @@ public class MyBoard extends View {
 
             Boolean playerWon = false;
             int winningPlayer = 0;
-            float valueX = event.getRawX() + (-translateSinceStartX);
-            float valueY = event.getRawY() + (-translateSinceStartY);
+            float valueX = event.getRawX() + (-translateSinceStartX-(mLeftMargin*2));
+            float valueY = event.getRawY() + (-translateSinceStartY-(mTopMargin*2));
 
             float x = (valueX / (emtySquareScaled.getWidth() * scaleFactor));
             float y = (valueY / (emtySquareScaled.getHeight() * scaleFactor));

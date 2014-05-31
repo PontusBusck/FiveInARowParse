@@ -162,6 +162,19 @@
             android:textColor="#FFFFFF"
             android:onClick="logoutUser"
             android:background="@drawable/game_list_button"
+            android:layout_above="@+id/refresh_button"
+            android:layout_marginBottom="10dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"/>
+
+        <Button
+            android:id="@+id/refresh_button"
+            android:layout_width="fill_parent"
+            android:layout_height="@dimen/button_height"
+            android:text="Refresh"
+            android:textColor="#FFFFFF"
+            android:onClick="refreshGamesButtonClicked"
+            android:background="@drawable/game_list_button"
             android:layout_above="@+id/back_button"
             android:layout_marginBottom="10dp"
             android:layout_marginLeft="20dp"

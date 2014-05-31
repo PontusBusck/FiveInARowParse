@@ -11,6 +11,7 @@ import com.parse.PushService;
 public class MainApplication extends Application {
     private static boolean isOnlineGameVisible;
     private static boolean isFriendListVisible;
+    private static boolean isGameListVisible;
     @Override
     public void onCreate() {
         super.onCreate();
@@ -31,6 +32,19 @@ public class MainApplication extends Application {
         isOnlineGameVisible = false;
     }
 
+    //Variabler för om spelListan är uppe
+    public static boolean isGameListVisible() {
+        return isGameListVisible;
+    }
+
+    public static void gameListIsVisibe() {
+        isGameListVisible = true;
+    }
+
+    public static void gameListIsNotVisible() {
+       isGameListVisible = false;
+    }
+
 
     //Variabler för om vänner listan är öppen
     public static boolean isFriendListVisible() {
@@ -38,10 +52,10 @@ public class MainApplication extends Application {
     }
 
     public static void friendListIsVisibe() {
-        isOnlineGameVisible = true;
+        isFriendListVisible = true;
     }
 
     public static void friendLiIsNotVisible() {
-        isOnlineGameVisible = false;
+        isFriendListVisible = false;
     }
 }

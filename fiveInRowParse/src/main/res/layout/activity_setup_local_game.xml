@@ -23,7 +23,8 @@
         android:layout_marginRight="144dp"
         android:textColorHint="@color/gray_background_color"
         android:layout_marginTop="48dp"
-        android:hint="Player one name"/>
+        android:hint="Player one name"
+        android:imeOptions="flagNoExtractUi"/>
 
     <EditText
         android:id="@+id/player_two_textfield"
@@ -34,11 +35,12 @@
         android:layout_marginRight="144dp"
         android:hint="Player two name"
         android:textColorHint="@color/gray_background_color"
-        android:layout_marginTop="12dp"/>
+        android:layout_marginTop="12dp"
+        android:imeOptions="flagNoExtractUi"/>
     <Button
         android:id="@+id/start_game_button"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/button_height"
         android:layout_below="@+id/player_two_textfield"
         android:layout_marginTop="12dp"
         android:layout_marginLeft="144dp"
@@ -49,8 +51,8 @@
         android:onClick="startTheGame"/>
 
     <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="150dp"
+        android:layout_height="@dimen/button_height"
         android:layout_alignParentLeft="true"
         android:layout_alignParentBottom="true"
         android:layout_margin="12dp"

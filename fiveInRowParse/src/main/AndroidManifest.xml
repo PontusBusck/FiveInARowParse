@@ -25,6 +25,7 @@
         android:theme="@style/AppTheme" >
         <activity
             android:name="com.example.fiveinrowparse.LocalGameActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/app_name"
             android:screenOrientation="landscape" >
         </activity>
@@ -85,7 +86,9 @@
             <intent-filter>
                 <action android:name="com.example.NEW_GAME_INVITE" />
                 <action android:name="com.busck.NEW_PLAYER_MOVE" />
-                <action android:name="com.busck.SYSTEM_BECOMES_INACTIVE" />
+                <action android:name="com.example.NEW_FRIEND_REQUEST"/>
+                <action android:name="com.busck.PLAY_AGAIN" />
+                <action android:name="com.example.ACCEPTED_FRIEND_REQUEST"/>
             </intent-filter>
         </receiver>
 
@@ -101,7 +104,9 @@
         </activity>
         <activity
             android:name="com.example.fiveinrowparse.setupLocalGame"
-            android:label="@string/title_activity_setup_local_game" >
+            android:label="@string/title_activity_setup_local_game"
+            android:screenOrientation="landscape" >
+
         </activity>
     </application>
 

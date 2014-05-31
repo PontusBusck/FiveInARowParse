@@ -2,8 +2,12 @@ package com.example.fiveinrowparse;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.NotificationManager;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -74,6 +78,13 @@ public class GameListActivity extends Activity {
     protected void onResume() {
         super.onResume();
 
+        //Tar bort alla notificationer
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.cancelAll();
+
+        MainApplication.gameListIsVisibe();
+        registerReceiver(broadcastReceiver, new IntentFilter("com.busck.UPPDATE_THE_GAME"));
+
         if(ParseUser.getCurrentUser() != null) {
 
 
@@ -84,6 +95,22 @@ public class GameListActivity extends Activity {
         handleLoginWindowVisability();
     }
 
+    BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            getAllGames();
+        }
+    };
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        MainApplication.gameListIsNotVisible();
+        unregisterReceiver(broadcastReceiver);
+
+    }
+
     //Visar och döljer log in rutorna
 
     public void handleLoginWindowVisability(){
@@ -91,6 +118,7 @@ public class GameListActivity extends Activity {
         ParseUser currentUser = ParseUser.getCurrentUser();
         Button toFriends = (Button) findViewById(R.id.open_friendlist_button);
         Button logoutButton = (Button) findViewById(R.id.logout_button);
+        Button refresh = (Button) findViewById(R.id.refresh_button);
 
         RelativeLayout loginLayout = (RelativeLayout) findViewById(R.id.login_layout);
 
@@ -100,6 +128,7 @@ public class GameListActivity extends Activity {
             usernameLabel.setText("Welcome " + ParseUser.getCurrentUser().getUsername());
             loginLayout.setVisibility(View.INVISIBLE);
             toFriends.setVisibility(View.VISIBLE);
+            refresh.setVisibility(View.VISIBLE);
 
             logoutButton.setVisibility(View.VISIBLE);
             animateViewOnLogIn();
@@ -107,6 +136,7 @@ public class GameListActivity extends Activity {
 
             loginLayout.setVisibility(View.VISIBLE);
             toFriends.setVisibility(View.GONE);
+            refresh.setVisibility(View.GONE);
 
             TextView usernameLabel = (TextView) findViewById(R.id.username_label);
             usernameLabel.setText("You have to login to continue");
@@ -146,10 +176,12 @@ public class GameListActivity extends Activity {
                 });
             } else{
                 Toast.makeText(this, "You must enter both a password and a username!", Toast.LENGTH_SHORT).show();
+                progresSpinner.setVisibility(View.GONE);
 
             }
         } else {
             Toast.makeText(this, "You must enter both a password and a username!", Toast.LENGTH_SHORT).show();
+            progresSpinner.setVisibility(View.GONE);
 
         }
     }
@@ -166,7 +198,7 @@ public class GameListActivity extends Activity {
         leftLayout.requestLayout();
 
 
-        //Animerar högra viewn (Kryper den och
+        //Animerar högra viewn (Kryper den
         final RelativeLayout rightLayout = (RelativeLayout) findViewById(R.id.right_gamelist_Layout);
 
 
@@ -230,16 +262,18 @@ public class GameListActivity extends Activity {
     }
 
     public void registerUser(View view) {
+        final ProgressBar progresSpinner = (ProgressBar) findViewById(R.id.progres_spinner_login);
+        progresSpinner.setVisibility(View.VISIBLE);
 
         EditText usernameField = (EditText) findViewById(R.id.username_login_textfield);
         EditText passwordField = (EditText) findViewById(R.id.password_login_textfield);
 
         if(usernameField.getText() != null && passwordField.getText() != null) {
-            String username = usernameField.getText().toString();
+            final String username = usernameField.getText().toString();
             String password = passwordField.getText().toString();
             ArrayList<String> friendArray = new ArrayList<String>();
 
-            if(!username.equals("") && !password.equals("")) {
+            if(!username.equals("") && !password.equals("") && username.matches("[a-zA-Z0-9. ]*") && username.length() <= 13) {
                 ParseUser user = new ParseUser();
                 user.setUsername(usernameField.getText().toString());
                 user.setPassword(usernameField.getText().toString());
@@ -247,7 +281,9 @@ public class GameListActivity extends Activity {
 
                 user.signUpInBackground(new SignUpCallback() {
                     public void done(ParseException e) {
+                        progresSpinner.setVisibility(View.GONE);
                         if (e == null) {
+
 
                             ParseInstallation installation = ParseInstallation.getCurrentInstallation();
                             installation.put("userId", ParseUser.getCurrentUser().getObjectId());
@@ -256,18 +292,34 @@ public class GameListActivity extends Activity {
                             handleLoginWindowVisability();
                             getAllGames();
                             Toast.makeText(GameListActivity.this, "User created!", Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(GameListActivity.this, "Something went wrong, please try again!", Toast.LENGTH_SHORT).show();
+                        } else if(e.getCode() == 202) { //202 är koden för upptaget username
+
+                            Toast.makeText(GameListActivity.this, "The username " + username + " is already taken!", Toast.LENGTH_SHORT).show();
+
+                        }else{
+                                Toast.makeText(GameListActivity.this, "Something went wrong, please try again!", Toast.LENGTH_SHORT).show();
+
                         }
                     }
                 });
 
 
             }else{
-                Toast.makeText(this, "You must choose both a password and a username!", Toast.LENGTH_SHORT).show();
+                progresSpinner.setVisibility(View.GONE);
+                final AlertDialog alertDialog = new AlertDialog.Builder(this).create();
+                alertDialog.setMessage("You must choose both a password and a username! The username can be max 13 characters long and can contain the letters A-Z, the numbers 0-9, dot and space.");
+                alertDialog.setButton(DialogInterface.BUTTON_NEUTRAL, "Ok", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        alertDialog.dismiss();
+                    }
+                });
+                //alertDialog.setIcon(R.drawable.icon);
+                alertDialog.show();
             }
 
         } else{
+            progresSpinner.setVisibility(View.GONE);
             Toast.makeText(this, "You must choose both a password and a username!", Toast.LENGTH_SHORT).show();
         }
     }
@@ -324,9 +376,9 @@ public class GameListActivity extends Activity {
 
 
                             //Om motståndaren raderat spelet
-                            if(gameToOpen.getString("deletedBy") != null){
+                            if (gameToOpen.getString("deletedBy") != null) {
                                 final AlertDialog alertDialog = new AlertDialog.Builder(GameListActivity.this).create();
-                                alertDialog.setMessage("Could not open the game because your opponent have deleted it" );
+                                alertDialog.setMessage("Could not open the game because your opponent have deleted it");
                                 alertDialog.setButton(DialogInterface.BUTTON_NEUTRAL, "Ok", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
@@ -339,7 +391,7 @@ public class GameListActivity extends Activity {
 
                             //Om man är spelare 2 och inte har accepterat spelet
 
-                            else if(!gameToOpen.getBoolean("playerTwoAccepted") && gameToOpen.getString("playerTwoName").equals(ParseUser.getCurrentUser().getUsername())){
+                            else if (!gameToOpen.getBoolean("playerTwoAccepted") && gameToOpen.getString("playerTwoName").equals(ParseUser.getCurrentUser().getUsername())) {
 
                                 AlertDialog.Builder builder1 = new AlertDialog.Builder(GameListActivity.this);
                                 builder1.setMessage("Do you accept this game invite?");
@@ -373,7 +425,8 @@ public class GameListActivity extends Activity {
                                                 });
 
                                             }
-                                        });
+                                        }
+                                );
                                 builder1.setNegativeButton("No, delete",
 
                                         //Raderar spelat om man klickar nej
@@ -383,17 +436,17 @@ public class GameListActivity extends Activity {
                                                 dialog.dismiss();
                                                 getAllGames();
                                             }
-                                        });
+                                        }
+                                );
 
                                 AlertDialog acceptGameAlert = builder1.create();
                                 acceptGameAlert.show();
-                            }else { //Om man inte är spelare två eller redan accepterat spelet
+                            } else { //Om man inte är spelare två eller redan accepterat spelet
 
                                 openGame(gameToOpen);
 
                             }
                         }
-
 
 
                     });
@@ -556,6 +609,10 @@ public class GameListActivity extends Activity {
         return pixels;
     }
 
+    public void refreshGamesButtonClicked(View view) {
+        getAllGames();
+    }
+
 
     static class GameListAdapter extends BaseAdapter {
 
@@ -611,22 +668,26 @@ public class GameListActivity extends Activity {
             if (game.getString("playersTurn").equals(ParseUser.getCurrentUser().getUsername())) {
                 ((TextView) convertView.findViewById(R.id.player_turn_label)).setText("Your turn!");
 
-            }else if(game.getNumber("winnerNumber").intValue() == 1){
-                 ((TextView) convertView.findViewById(R.id.player_turn_label)).setText(game.getString("playerOneName") + " Won!");
+            }else{
+                ((TextView) convertView.findViewById(R.id.player_turn_label)).setText(game.getString("playersTurn") + " Turn!");
+            }
+
+
+            //Ändrar player turn labeln om någon vann
+           if(game.getNumber("winnerNumber").intValue() == 1){
+                ((TextView) convertView.findViewById(R.id.player_turn_label)).setText(game.getString("playerOneName") + " Won!");
 
                 if(game.getString("playerOneName").equals(ParseUser.getCurrentUser().getUsername())){
                     ((TextView) convertView.findViewById(R.id.player_turn_label)).setText("You" + " Won!");
                 }
 
-           }else if(game.getNumber("winnerNumber").intValue() == 2){
+            }else if(game.getNumber("winnerNumber").intValue() == 2){
                 ((TextView) convertView.findViewById(R.id.player_turn_label)).setText(game.getString("playerTwoName") + " Won!");
 
                 if(game.getString("playerTwoName").equals(ParseUser.getCurrentUser().getUsername())){
                     ((TextView) convertView.findViewById(R.id.player_turn_label)).setText("You" + " Won!");
                 }
 
-            }else{
-                ((TextView) convertView.findViewById(R.id.player_turn_label)).setText(game.getString("playersTurn") + " Turn!");
             }
 
             if (game.getString("deletedBy") != null) {

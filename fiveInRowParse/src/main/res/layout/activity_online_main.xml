@@ -20,21 +20,22 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
+            android:layout_marginLeft="15dp"
             android:layout_centerVertical="true"
-            android:text="Player one"
+            android:text="Loading..."
             android:textSize="30sp"
-            android:textColor="@color/pink_background_color"/>
+            android:textColor="#FFFFFF"/>
 
         <TextView
             android:id="@+id/player_one_score"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="scorePlayerOne"
+            android:text="Loading..."
             android:layout_toRightOf="@+id/player_turn_string"
             android:layout_marginLeft="12dp"
             android:layout_marginTop="6dp"
             android:layout_alignParentTop="true"
-            android:textColor="@color/pink_background_color"/>
+            android:textColor="#FFFFFF"/>
 
 
         <TextView
@@ -45,8 +46,8 @@
             android:layout_marginLeft="12dp"
             android:layout_toRightOf="@+id/player_turn_string"
             android:layout_alignParentBottom="true"
-            android:text="scorePlayerTwo"
-            android:textColor="@color/pink_background_color"/>
+            android:text="Loading..."
+            android:textColor="#FFFFFF"/>
 
 
 
@@ -57,8 +58,7 @@
             android:layout_toLeftOf= "@+id/menu_button"
             android:background="@drawable/game_list_item_background"
             android:text="Lobby"
-            android:layout_marginTop="4dp"
-            android:layout_marginBottom="4dp"
+            android:layout_centerVertical="true"
             android:layout_marginLeft="20dp"
             android:textColor="#FFFFFF"
             android:onClick="exitGame"
@@ -70,11 +70,10 @@
             android:layout_height="@dimen/button_height"
             android:layout_toLeftOf="@+id/return_lobby_button"
             android:layout_marginLeft="20dp"
-            android:layout_marginTop="4dp"
-            android:layout_marginBottom="4dp"
+            android:layout_centerVertical="true"
             android:text="Play again"
             android:textColor="#FFFFFF"
-            android:onClick="resetGame"
+            android:onClick="playAgain"
             android:visibility="invisible"
             android:background="@drawable/game_list_item_background"/>
 
@@ -85,6 +84,7 @@
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:layout_marginLeft="20dp"
+            android:layout_marginRight="10dp"
             android:text="Menu"
             android:textColor="#FFFFFF"
             android:onClick="openMenu"
@@ -106,6 +106,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="@dimen/button_height"
                 android:layout_centerVertical="true"
+                android:layout_marginLeft="10dp"
                 android:text="Dark theme"
                 android:textColor="#FFFFFF"
                 android:layout_alignParentLeft="true"
@@ -128,16 +129,94 @@
                 />
 
             <Button
+                android:id="@+id/close_button"
                 android:layout_width="wrap_content"
                 android:layout_height="@dimen/button_height"
                 android:layout_alignParentRight="true"
                 android:layout_marginLeft="20dp"
+                android:layout_marginRight="10dp"
+
                 android:layout_centerVertical="true"
                 android:text="Close"
-
                 android:textColor="#FFFFFF"
                 android:onClick="openMenu"
                 android:background="@drawable/game_list_item_background"/>
+
+            <Button
+                android:id="@+id/refresh_game_button"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/button_height"
+                android:layout_toLeftOf="@id/close_button"
+                android:layout_marginLeft="20dp"
+                android:layout_centerVertical="true"
+                android:text="Refresh"
+                android:textColor="#FFFFFF"
+                android:onClick="refreshGameButtonClicked"
+                android:background="@drawable/game_list_item_background"/>
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/play_again_layout"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_alignParentBottom="true"
+            android:visibility="invisible"
+            android:clickable="true"
+            android:background="@color/gray_background_color"
+            >
+
+            <Button
+                android:id="@+id/play_again_button_menue"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/button_height"
+                android:layout_toLeftOf="@+id/return_lobby_button_menue"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="4dp"
+                android:text="Play again"
+                android:textColor="#FFFFFF"
+                android:onClick="playAgain"
+                android:visibility="visible"
+                android:background="@drawable/game_list_item_background"/>
+
+            <RelativeLayout
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:gravity="center"
+                android:layout_toLeftOf="@id/play_again_button_menue">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:gravity="center"
+                android:textColor="@color/pink_background_color"
+                android:text="Your opponent wants to play again. \n Do you?"
+                />
+
+            </RelativeLayout>
+
+
+
+            <Button
+                android:id="@+id/return_lobby_button_menue"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/button_height"
+                android:layout_alignParentRight="true"
+                android:background="@drawable/game_list_item_background"
+                android:text="Lobby"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="4dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:textColor="#FFFFFF"
+                android:onClick="exitGame"
+                android:visibility="visible"/>
+
+
+
+
 
         </RelativeLayout>
 
@@ -148,8 +227,12 @@
     <RelativeLayout
         android:id="@+id/game_online_board_view"
         android:layout_above="@id/game_stats_layout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:gravity="center"
+        android:layout_centerInParent="true"
+        >
+
         </RelativeLayout>
 
 
